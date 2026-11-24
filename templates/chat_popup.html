@@ -1,0 +1,62 @@
+{# templates/chat_popup.html #}
+{% csrf_token %}
+
+<div id="chat-container" style="display:none; position:fixed; bottom:10px; right:10px; width:300px; background:white; border:1px solid #ccc; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:9999;">
+    <div style="background:#007bff; color:white; padding:10px; cursor:pointer;" onclick="toggleChat()">Chat</div>
+    <div style="padding:10px;">
+        {% if users|length > 1 %}
+            <select id="user-select">
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        {% else %}
+            <input type="hidden" id="user-select" value="{{ users.0.id }}">
+        {% endif %}
+
+        <div id="chat-box" style="height:200px; overflow:auto; border:1px solid black; margin-top:10px;"></div>
+        <textarea id="message-input" placeholder="Type your message here..." style="width:100%;"></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    function toggleChat() {
+        const chat = document.getElementById("chat-container");
+        chat.style.display = chat.style.display === "none" ? "block" : "none";
+    }
+
+    let receiver_id = $("#user-select").val();
+
+    $("#user-select").change(function () {
+        receiver_id = $(this).val();
+        loadMessages();
+    });
+
+    function sendMessage() {
+        let message = $("#message-input").val();
+        $.post("/send/", {
+            'receiver_id': receiver_id,
+            'content': message,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        }, function () {
+            $("#message-input").val('');
+            loadMessages();
+        });
+    }
+
+    function loadMessages() {
+        $.get("/get-messages/", {
+            'receiver_id': receiver_id
+        }, function (data) {
+            let html = '';
+            data.messages.forEach(msg => {
+                html += `<p><b>${msg.sender}</b>: ${msg.content} <i>(${msg.timestamp})</i></p>`;
+            });
+            $("#chat-box").html(html);
+        });
+    }
+
+    setInterval(loadMessages, 3000);
+    loadMessages();
+</script>

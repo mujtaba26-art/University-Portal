@@ -1,0 +1,2319 @@
+{% extends "base-teacher.html" %}
+  {% block content %}
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0; 
+      padding: 0;
+    }
+
+    .wizard-container {
+      width: 80%;
+      max-width: 1200px;
+      margin: 50px auto;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    .wizard-header {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+    }
+    /* Hide scrollbar for Webkit browsers */
+    .wizard-header::-webkit-scrollbar {
+      display: none;
+    }
+    .wizard-header {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;     /* Firefox */
+    }
+
+    /* Tab items */
+    .wizard-header .tab {
+      padding: 10px 15px;
+      border-radius: 4px;
+      color: #333;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      white-space: nowrap;
+    }
+
+    .wizard-header .tab.active {
+      background-color: #000; /* Black active tab */
+      color: #fff;
+    }
+
+    /* Hide tab content by default */
+    .tab-content {
+      display: none;
+    }
+    /* Show the active tab content */
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .form-actions button {
+      padding: 10px 20px;
+      font-size: 14px;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Previous & Next buttons in black */
+    .form-actions button.previous,
+    .form-actions button.next {
+      background-color: #000;
+    }
+
+    /* Save button in green */
+    .form-actions button.save {
+      background-color: #28a745;
+    }
+
+    /* File input styling */
+    .file-input {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .choose-btn {
+      background-color: #000; /* Black CHOOSE FILE button */
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .file-chosen {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .wizard-container {
+        width: 95%;
+        padding: 15px;
+      }
+      .wizard-header .tab {
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+      .form-group label, .form-group select {
+        font-size: 13px;
+      }
+      .form-actions button {
+        padding: 8px 16px;
+        font-size: 13px;
+      }
+      .choose-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+    }
+  </style>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+
+
+</head>
+<body>
+  <div class="wizard-container">
+    <!-- Wizard Header (Tabs) -->
+    <div class="wizard-header">
+      <div class="tab active" data-tab="academic-schedule">Academic Schedule</div>
+      <div class="tab" data-tab="course-objective">Course Objective</div>
+      <div class="tab" data-tab="course-outline">Course Outline</div>
+      <div class="tab" data-tab="weekly-plan">Weekly Plan</div>
+      <div class="tab" data-tab="timetable">Timetable</div>
+      <div class="tab" data-tab="attendance-record">Attendance Record</div>
+      <div class="tab" data-tab="record-of-makeup-classes">Makeup Classes</div>
+      <div class="tab" data-tab="counseling-hours">Counseling Hours</div>
+      <div class="tab" data-tab="lecture-notes">Lecture Notes</div>
+      <div class="tab" data-tab="reference-materials">Reference Materials</div>
+      <div class="tab" data-tab="assignments">Assignments</div>
+      <div class="tab" data-tab="quizzes">Quizzes</div>
+      <div class="tab" data-tab="presentations">Presentations</div>
+      <div class="tab" data-tab="mid-term-paper">Mid-Term Paper</div>
+      <div class="tab" data-tab="final-term-paper">Final-Term Paper</div>
+      <div class="tab" data-tab="sessional-marks">Sessional Marks</div>
+      <div class="tab" data-tab="recommendations-suggestions">Recommendations & Suggestions</div>
+    </div>
+
+    <form method="post" id="main-form" enctype="multipart/form-data">
+      {% csrf_token %}
+
+    <div id="academic-schedule" class="tab-content">
+      <!-- Academic Schedule content -->
+      <div class="form-group">
+        <!-- filepath: d:\mern stack\cecoscoursefolder\templates\edit_upload_folder.html -->
+
+<label for="semester">Select Semester:</label>
+<select name="semester" id="semester">
+    <option value="">Select Semester</option>
+    {% for semester in semester_type %}
+        <option value="{{ semester.name }}"
+            {% if selected_semester and selected_semester.name == semester.name %}selected{% endif %}>
+            {{ semester.name }}
+        </option>
+    {% endfor %}
+</select>
+
+<br><br>
+
+<label for="year">Select Year:</label>
+<select name="year" id="year">
+    <option value="">Select Year</option>
+    {% for year in Year %}
+        <option value="{{ year.name }}"
+            {% if selected_year and selected_year.name == year.name %}selected{% endif %}>
+            {{ year.name }}
+        </option>
+    {% endfor %}
+</select>
+  
+     </div>
+    </div>
+    <div id="course-objective" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{ forms.course_objective_form}}
+        <p>
+  Course Objective File: 
+  {% if forms.course_objective_form.instance.objectivefile %}
+    <a href="{{ forms.course_objective_form.instance.objectivefile.url }}" target="_blank">
+      {{ forms.course_objective_form.instance.objectivefile.name }}
+    </a>
+  {% else %}
+    No file uploaded.
+  {% endif %} 
+  
+</p>
+
+       </div>
+    </div>
+
+    <div id="course-outline" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.course_outline_form}}
+<p>Course Outline File:  
+  {% if forms.course_outline_form.instance.outlinefile %}
+    <a href="{{ forms.course_outline_form.instance.outlinefile.url }}" target="_blank">
+      {{ forms.course_outline_form.instance.outlinefile.name }}
+    </a>
+  {% else %}
+    No file uploaded.
+  {% endif %}
+</p>
+
+        
+       </div>
+    </div>
+
+    
+    <div id="weekly-plan" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.weekly_plan_form.as_p}}
+        Weekly Plan File: 
+{% if forms.weekly_plan_form.instance.weeklyplanfile %}
+  <a href="{{ forms.weekly_plan_form.instance.weeklyplanfile.url }}" target="_blank">
+    {{ forms.weekly_plan_form.instance.weeklyplanfile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+
+       </div>
+    </div>
+
+
+
+    
+    <div id="timetable" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.timetable_form}}
+        Timetable File: 
+{% if forms.timetable_form.instance.timetablefile %}
+  <a href="{{ forms.timetable_form.instance.timetablefile.url }}" target="_blank">
+    {{ forms.timetable_form.instance.timetablefile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+       </div>
+    </div>
+
+    <div id="attendance-record" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.attendance_record_form}}
+        Attendance Record File: 
+{% if forms.attendance_record_form.instance.attendancerecordfile %}
+  <a href="{{ forms.attendance_record_form.instance.attendancerecordfile.url }}" target="_blank">
+    {{ forms.attendance_record_form.instance.attendancerecordfile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+       </div>
+    </div>
+
+    
+    <div id="record-of-makeup-classes" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.makeup_class_form}}
+        Makeup Class File: 
+{% if forms.makeup_class_form.instance.makeupclassfile %}
+  <a href="{{ forms.makeup_class_form.instance.makeupclassfile.url }}" target="_blank">
+    {{ forms.makeup_class_form.instance.makeupclassfile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+
+       </div>
+    </div>
+
+    
+    <div id="counseling-hours" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.counseling_hours_form}}
+        Counseling Hours File: 
+{% if forms.counseling_hours_form.instance.counselinghourfile %}
+  <a href="{{ forms.counseling_hours_form.instance.counselinghourfile.url }}" target="_blank">
+    {{ forms.counseling_hours_form.instance.counselinghourfile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+       
+       </div>
+    </div>
+    <div id="lecture-notes" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.lecture_notes_form}}
+        Lecture Notes File: 
+{% if forms.lecture_notes_form.instance.lecturenotesfile %}
+  <a href="{{ forms.lecture_notes_form.instance.lecturenotesfile.url }}" target="_blank">
+    {{ forms.lecture_notes_form.instance.lecturenotesfile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+       </div>
+    </div>
+
+    <div id="reference-materials" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.reference_material_form}}
+        Reference Material File: 
+{% if forms.reference_material_form.instance.referencefile %}
+  <a href="{{ forms.reference_material_form.instance.referencefile.url }}" target="_blank">
+    {{ forms.reference_material_form.instance.referencefile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+       </div>
+    </div>
+    
+    <div id="assignments" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        
+<div class="container mt-5">
+  <h2>Assignments</h2>
+
+  <!-- Accordion for Assignments -->
+  <div id="assignmentsAccordion">
+
+    <!-- Assignment 1 -->
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            Assignment 1
+          </button>
+        </h5>
+      </div>
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#assignmentsAccordion">
+        <div class="card-body">
+            <div class="form-group">
+              <label for="assignment1file">Assignment File</label>
+              <input type="file" class="form-control" name="assignment1file" id="assignment1file" placeholder="upload file">
+            </div>
+            <div class="form-group">
+              <label for="assignment1Marks">Marks (out of 10)</label>
+              <input type="number" class="form-control" name="assignment1Marks" id="assignment1Marks" placeholder="Enter marks out of 10">
+            </div>
+            <div class="form-group">
+              <label for="assignment1Category">Category</label>
+              <select class="form-control" name="assignment1Category" id="assignment1Category">
+                <option value="Best">Best</option>
+                <option value="Average">Average</option>
+                <option value="Worst">Worst</option>
+            
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="assignment1Comments">Comments (At least 3 based on the rubric)</label>
+              <textarea class="form-control" name="assignment1Comments" id="assignment1Comments" rows="4" placeholder="Enter comments"></textarea>
+            </div>
+            <table style='margin-top:10px;' id="assignment1-table" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Assignment File</th>
+                  <th>Mark</th>
+                  <th>Category</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                {% for i in  assigment1 %}
+                <tr>
+  <td contenteditable="true">{{ i.file }}</td>
+  <td contenteditable="true">{{ i.marks_obtained }}</td>
+  <td contenteditable="true">{{ i.category }}</td>
+  <td contenteditable="true">{{ i.comments }}</td>
+          <td><button type="button"  class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+
+</tr>
+
+
+                                {% endfor %}
+
+                <!-- Rows will be added here dynamically -->
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" onclick="addassignment1()">Add Assignment</button>
+    
+        </div>
+      </div>
+    </div>
+
+    <!-- Assignment 2 -->
+    <div class="card">
+      <div class="card-header" id="headingTwo">
+        <h5 class="mb-0">
+          <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            Assignment 2
+          </button>
+        </h5>
+      </div>
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#assignmentsAccordion">
+        <div class="card-body">
+            <div class="form-group">
+              <label for="assignment2file">Assignment File</label>
+              <input type="file" class="form-control" name="assignment2file" id="assignment2file" placeholder="upload file">
+            </div>
+            <div class="form-group">
+              <label for="assignment2Marks">Marks (out of 10)</label>
+              <input type="number" class="form-control" name="assignment2Marks" id="assignment2Marks" placeholder="Enter marks out of 10">
+            </div>
+            <div class="form-group">
+              <label for="assignment2Category">Category</label>
+              <select class="form-control" name="assignment2Category" id="assignment2Category">
+                <option value="Best">Best</option>
+                <option value="Average">Average</option>
+                <option value="Worst">Worst</option>
+            
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="assignment2Comments">Comments (At least 3 based on the rubric)</label>
+              <textarea class="form-control" name="assignment2Comments" id="assignment2Comments" rows="4" placeholder="Enter comments"></textarea>
+            </div>
+            <table style='margin-top:10px;' id="assignment2-table" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Assignment File</th>
+                  <th>Mark</th>
+                  <th>Category</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                {% for i in  assigment2 %}
+                <tr>
+  <td contenteditable="true">{{ i.file }}</td>
+  <td contenteditable="true">{{ i.marks_obtained }}</td>
+  <td contenteditable="true">{{ i.category }}</td>
+  <td contenteditable="true">{{ i.comments }}</td>
+          <td><button type="button"  class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+
+</tr>
+
+
+                                {% endfor %}
+                <!-- Rows will be added here dynamically -->
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" onclick="addassignment2()">Add Assignment</button>
+    
+        </div>
+      </div>
+    </div>
+
+    <!-- Assignment 3 -->
+    <div class="card">
+      <div class="card-header" id="headingThree">
+        <h5 class="mb-0">
+          <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+            Assignment 3
+          </button>
+        </h5>
+      </div>
+      <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#assignmentsAccordion">
+        <div class="card-body">
+            <div class="form-group">
+              <label for="assignment3file">Assignment File</label>
+              <input type="file" class="form-control" name="assignment3file" id="assignment3file" placeholder="upload file">
+            </div>
+            <div class="form-group">
+              <label for="assignment3Marks">Marks (out of 10)</label>
+              <input type="number" class="form-control" name="assignment3Marks" id="assignment3Marks" placeholder="Enter marks out of 10">
+            </div>
+            <div class="form-group">
+              <label for="assignment3Category">Category</label>
+              <select class="form-control" name="assignment3Category" id="assignment3Category">
+                <option value="Best">Best</option>
+                <option value="Average">Average</option>
+                <option value="Worst">Worst</option>
+            
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="assignment3Comments">Comments (At least 3 based on the rubric)</label>
+              <textarea class="form-control" name="assignment3Comments" id="assignment3Comments" rows="4" placeholder="Enter comments"></textarea>
+            </div>
+            <table style='margin-top:10px;' id="assignment3-table" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Assignment File</th>
+                  <th>Mark</th>
+                  <th>Category</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                {% for i in  assigment3 %}
+<tr>
+  <td contenteditable="true">{{ i.file }}</td>
+  <td contenteditable="true">{{ i.marks_obtained }}</td>
+  <td contenteditable="true">{{ i.category }}</td>
+  <td contenteditable="true">{{ i.comments }}</td>
+          <td><button type="button"  class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+
+</tr>
+
+                                {% endfor %}
+                <!-- Rows will be added here dynamically -->
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" onclick="addassignment3()">Add Assignment</button>
+    
+        </div>
+      </div>
+    </div>
+
+    <!-- Assignment 4 -->
+    <div class="card">
+      <div class="card-header" id="headingFour">
+        <h5 class="mb-0">
+          <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+            Assignment 4
+          </button>
+        </h5>
+      </div>
+      <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#assignmentsAccordion">
+        <div class="card-body">
+            <div class="form-group">
+              <label for="assignment4file">Assignment File</label>
+              <input type="file" class="form-control" name="assignment4file" id="assignment4file" placeholder="upload file">
+            </div>
+            <div class="form-group">
+              <label for="assignment4Marks">Marks (out of 10)</label>
+              <input type="number" class="form-control" name="assignment4Marks" id="assignment4Marks" placeholder="Enter marks out of 10">
+            </div>
+            <div class="form-group">
+              <label for="assignment4Category">Category</label>
+              <select class="form-control" name="assignment4Category" id="assignment4Category">
+                <option value="Best">Best</option>
+                <option value="Average">Average</option>
+                <option value="Worst">Worst</option>
+            
+              </select>
+            </div>
+    
+            <div class="form-group">
+              <label for="assignment4Comments">Comments (At least 3 based on the rubric)</label>
+              <textarea class="form-control" name="assignment4Comments" id="assignment4Comments" rows="4" placeholder="Enter comments"></textarea>
+            </div>
+            <table style='margin-top:10px;' id="assignment4-table" class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Assignment File</th>
+                  <th>Mark</th>
+                  <th>Category</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody>
+                
+                {% for i in  assigment4 %}
+<tr>
+  <td contenteditable="true">{{ i.file }}</td>
+  <td contenteditable="true">{{ i.marks_obtained }}</td>
+  <td contenteditable="true">{{ i.category }}</td>
+  <td contenteditable="true">{{ i.comments }}</td>
+          <td><button type="button"  class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+
+</tr>
+
+                                {% endfor %}
+                <!-- Rows will be added here dynamically -->
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" onclick="addassignment4()">Add Assignment</button>
+    
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- End Accordion -->
+</div>
+
+
+        {% comment %} {{forms.assignment_form}}  {% endcomment %}
+       </div>
+    </div>
+    
+    <div id="quizzes" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+
+        <div class="container mt-5">
+          <h2>Quizzes</h2>
+        
+          <!-- Accordion for Quizzes -->
+          <div id="quizzesAccordion">
+        
+            <!-- Quiz 1 -->
+            <div class="card">
+              <div class="card-header" id="headingOne">
+                <h5 class="mb-0">
+                  <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Quiz 1
+                  </button>
+                </h5>
+              </div>
+              <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#quizzesAccordion">
+                <div class="card-body">
+                    <div class="form-group">
+                      <label for="quiz1file">Quiz File</label>
+                      <input type="file" class="form-control" name="quiz1file" id="quiz1file" placeholder="upload file">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz1Marks">Marks (out of 10)</label>
+                      <input type="number" class="form-control" name="quiz1Marks" id="quiz1Marks" placeholder="Enter marks out of 10">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz1Category">Category</label>
+                      <select class="form-control" name="quiz1Category" id="quiz1Category">
+                        <option value="Best">Best</option>
+                        <option value="Average">Average</option>
+                        <option value="Worst">Worst</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz1Comments">Comments (At least 3 based on the rubric)</label>
+                      <textarea class="form-control" name="quiz1Comments" id="quiz1Comments" rows="4" placeholder="Enter comments"></textarea>
+                    </div>
+
+
+                    <table style='margin-top:10px;' id="quiz1-table" class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Quiz File</th>
+                          <th>Mark</th>
+                          <th>Category</th>
+                          <th>Comments</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        
+                {% for i in  quiz1%}
+                <tr>
+                  
+                  <td contenteditable="true"
+>{{ i.file }}</td>
+                  <td contenteditable="true"
+>{{ i.marks_obtained }}</td>
+                  <td contenteditable="true"
+>{{ i.category }}</td>
+                  <td contenteditable="true"
+>{{ i.comments }}</td>
+        <td><button type="button"  class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+
+
+                </tr>
+
+                                {% endfor %}
+                        <!-- Rows will be added here dynamically -->
+                      </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" onclick="addquiz1()">Add Quiz</button>
+            
+                </div>
+              </div>
+            </div>
+        
+            <!-- Quiz 2 -->
+            <div class="card">
+              <div class="card-header" id="headingTwo">
+                <h5 class="mb-0">
+                  <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Quiz 2
+                  </button>
+                </h5>
+              </div>
+              <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#quizzesAccordion">
+                <div class="card-body">
+                    <div class="form-group">
+                      <label for="quiz2file">Quiz File</label>
+                      <input type="file" class="form-control" name="quiz2file" id="quiz2file" placeholder="upload file">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz2Marks">Marks (out of 10)</label>
+                      <input type="number" class="form-control" name="quiz2Marks" id="quiz2Marks" placeholder="Enter marks out of 10">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz2Category">Category</label>
+                      <select class="form-control" name="quiz2Category" id="quiz2Category">
+                        <option value="Best">Best</option>
+                        <option value="Average">Average</option>
+                        <option value="Worst">Worst</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz2Comments">Comments (At least 3 based on the rubric)</label>
+                      <textarea class="form-control" name="quiz2Comments" id="quiz2Comments" rows="4" placeholder="Enter comments"></textarea>
+                    </div>
+
+
+                    
+
+                    <table style='margin-top:10px;' id="quiz2-table" class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Quiz File</th>
+                          <th>Mark</th>
+                          <th>Category</th>
+                          <th>Comments</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                           
+                {% for i in  quiz2%}
+                <tr>
+
+                  <td contenteditable="true">{{ i.file }}</td>
+                  <td contenteditable="true">{{ i.marks_obtained }}</td>
+                  <td contenteditable="true">{{ i.category }}</td>
+                  <td contenteditable="true">{{ i.comments }}</td>
+        <td><button type="button" class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+
+                </tr>
+                                                {% endfor %}
+
+                        <!-- Rows will be added here dynamically -->
+                      </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" onclick="addquiz2()">Add Quiz</button>
+            
+
+                </div>
+              </div>
+            </div>
+        
+            <!-- Quiz 3 -->
+            <div class="card">
+              <div class="card-header" id="headingThree">
+                <h5 class="mb-0">
+                  <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Quiz 3
+                  </button>
+                </h5>
+              </div>
+              <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#quizzesAccordion">
+                <div class="card-body">
+                    <div class="form-group">
+                      <label for="quiz3file">Quiz File</label>
+                      <input type="file" class="form-control" name="quiz3file" id="quiz3file" placeholder="upload file">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz3Marks">Marks (out of 10)</label>
+                      <input type="number" class="form-control" name="quiz3Marks" id="quiz3Marks" placeholder="Enter marks out of 10">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz3Category">Category</label>
+                      <select class="form-control" name="quiz3Category" id="quiz3Category">
+                        <option value="Best">Best</option>
+                        <option value="Average">Average</option>
+                        <option value="Worst">Worst</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz3Comments">Comments (At least 3 based on the rubric)</label>
+                      <textarea class="form-control" name="quiz3Comments" id="quiz3Comments" rows="4" placeholder="Enter comments"></textarea>
+                    </div>
+
+
+                    
+
+                    <table style='margin-top:10px;' id="quiz3-table" class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Quiz File</th>
+                          <th>Mark</th>
+                          <th>Category</th>
+                          <th>Comments</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                           
+                {% for i in  quiz3%}
+                <tr>
+                  
+                  <td contenteditable="true">{{ i.file }}</td>
+                  <td contenteditable="true">{{ i.marks_obtained }}</td>
+                  <td contenteditable="true">{{ i.category }}</td>
+                  <td contenteditable="true">{{ i.comments }}</td>
+        <td><button type="button"  class="btn btn-danger" onclick="deleteRow(this)">Delete</button></td>
+
+
+                </tr>
+                                {% endfor %}
+                        <!-- Rows will be added here dynamically -->
+                      </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" onclick="addquiz3()">Add Quiz</button>
+            
+
+                </div>
+              </div>
+            </div>
+        
+            <!-- Quiz 4 -->
+            <div class="card">
+              <div class="card-header" id="headingFour">
+                <h5 class="mb-0">
+                  <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    Quiz 4
+                  </button>
+                </h5>
+              </div>
+              <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#quizzesAccordion">
+                <div class="card-body">
+                    <div class="form-group">
+                      <label for="quiz4file">Quiz File</label>
+                      <input type="file" class="form-control" name="quiz4file" id="quiz4file" placeholder="upload file">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz4Marks">Marks (out of 10)</label>
+                      <input type="number" class="form-control" name="quiz4Marks" id="quiz4Marks" placeholder="Enter marks out of 10">
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz4Category">Category</label>
+                      <select class="form-control" name="quiz4Category" id="quiz4Category">
+                        <option value="Best">Best</option>
+                        <option value="Average">Average</option>
+                        <option value="Worst">Worst</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="quiz4Comments">Comments (At least 3 based on the rubric)</label>
+                      <textarea class="form-control" name="quiz4Comments" id="quiz4Comments" rows="4" placeholder="Enter comments"></textarea>
+                    </div>
+                    
+
+                    <table style='margin-top:10px;' id="quiz4-table" class="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>Quiz File</th>
+                          <th>Mark</th>
+                          <th>Category</th>
+                          <th>Comments</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                           
+                {% for i in  quiz4%}
+                <tr>
+                  
+                  <td contenteditable="true">{{ i.file }}</td>
+                  <td contenteditable="true">{{ i.marks_obtained }}</td>
+                  <td contenteditable="true">{{ i.category }}</td>
+                  <td contenteditable="true">{{ i.comments }}</td>
+        <td><button class="btn btn-danger" type="button" onclick="deleteRow(this)">Delete</button></td>
+
+                </tr>
+                                {% endfor %}
+                        <!-- Rows will be added here dynamically -->
+                      </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary" onclick="addquiz4()">Add Quiz</button>
+            
+
+                </div>
+              </div>
+            </div>
+        
+          </div>
+          <!-- End Accordion -->
+        </div>
+        
+       </div>
+    </div>
+    <div id="presentations" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {% comment %} {{forms.presentation_form}} {% endcomment %}
+          <div>
+      <label for="id_group_name">Group name:</label>
+  
+  
+  
+  <input type="text" name="group_name" class="form-control" maxlength="100" required="" id="id_group_name">
+      
+  </div>
+  
+    <div>
+      <label for="id_topic">Topic:</label>
+  
+  
+  
+  <input type="text" name="topic" class="form-control" maxlength="200" required="" id="id_topic">
+      
+  </div>
+  
+    <div>
+      <label for="id_student_name">Student name:</label>
+  
+  
+  
+  <input type="text" name="student_name" class="form-control" maxlength="100" required="" id="id_student_name">
+      
+  </div>
+  
+    <div>
+      <label for="id_marks_obtained">Marks obtained:</label>
+  
+  <div class="helptext" id="id_marks_obtained_helptext">Marks out of 10</div>
+  
+  <input type="number" name="marks_obtained" class="form-control" min="0" required="" aria-describedby="id_marks_obtained_helptext" id="id_marks_obtained">
+      
+  </div>
+  
+    <div>
+      <label for="id_comments">Comments:</label>
+  
+  <div class="helptext" id="id_comments_helptext">Teacher's feedback</div>
+  
+  <textarea name="comments" cols="40" rows="4" class="form-control" required="" aria-describedby="id_comments_helptext" id="id_comments"></textarea>
+      
+        
+      
+  </div>
+       
+        <table style='margin-top:10px;' id="presentation-table" class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Group Name</th>
+              <th>Topic</th>
+              <th>Student Name</th>
+              <th>Marks Obtained</th>
+              <th>Comments</th>
+              <th>Edit</th>
+              <th>Delete</th>
+
+            </tr>
+          </thead>
+          <tbody>
+          {% for i  in  presentation %}
+            <tr>
+              <td contenteditable="true">{{ i.group_name }}</td>
+<td contenteditable="true">{{ i.topic }}</td>
+<td contenteditable="true">{{ i.student_name }}</td>
+<td contenteditable="true">{{ i.marks_obtained }}</td>
+<td contenteditable="true">{{ i.comments }}</td>
+        <td><button type="button" onclick="deleteRow(this)">Delete</button></td>
+
+
+              </td>
+            </tr>
+                      {% endfor %}
+
+                    </tbody>
+        </table>
+        <button type="button" class="btn btn-primary" onclick="addNewRow()">Add Presentation</button>
+
+       </div>
+       
+    </div>
+    
+    <div id="mid-term-paper" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+  <div class="form-group">
+    <label for="{{ forms.mid_term_paper_form.mid_paper_file.id_for_label }}">Mid Term Paper File</label>
+    {{ forms.mid_term_paper_form.mid_paper_file }}
+    {% if forms.mid_term_paper_form.mid_paper_file.errors %}
+      <div class="text-danger">{{ forms.mid_term_paper_form.mid_paper_file.errors }}</div>
+    {% endif %}
+  </div>
+        Midterm Paper File: 
+{% if forms.mid_term_paper_form.instance.mid_paper_file %}
+  <a href="{{ forms.mid_term_paper_form.instance.mid_paper_file.url }}" target="_blank">
+    {{ forms.mid_term_paper_form.instance.mid_paper_file.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+  
+
+
+<!-- Label and Input -->
+<label for="{{ forms.mid_term_paper_form.mid_solution_file.id_for_label }}">
+  Mid Term Paper File
+</label>
+{{ forms.mid_term_paper_form.mid_solution_file }}
+
+<!-- Error Handling -->
+{% if forms.mid_term_paper_form.mid_solution_file.errors %}
+  <div class="text-danger">
+    {{ forms.mid_term_paper_form.mid_solution_file.errors }}
+  </div>
+{% endif %}
+
+<!-- Existing File Display -->
+<p>Midterm Paper File:</p>
+{% if forms.mid_term_paper_form.instance.mid_solution_file %}
+  <a href="{{ forms.mid_term_paper_form.instance.mid_solution_file.url }}" target="_blank">
+    {{ forms.mid_term_paper_form.instance.mid_solution_file.name }}
+  </a>
+{% else %}
+  <span>No file uploaded.</span>
+{% endif %}
+
+mid_solution_file
+<div class="container mt-5">
+  <h2 class="mb-0 d-flex justify-content-between align-items-center">
+    Mid Term Paper Solution File
+    <span id="midtermpaper-span"></span>
+  </h2>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="form-group">
+        <label for="midtermpapersolutionfile">Mid Term Paper Solution File</label>
+        <input type="file" class="form-control" id="midtermpapersolutionfile" name="midtermpapersolutionfile">
+      </div>
+
+      <div class="form-group">
+        <label for="midtermpapersolutionmarks">Marks (out of 10)</label>
+        <input type="number" class="form-control" id="midtermpapersolutionmarks" name="midtermpapersolutionmarks" placeholder="Enter marks out of 10">
+      </div>
+
+      <div class="form-group">
+        <label for="midtermpapersolutioncategory">Category</label>
+        <select class="form-control" id="midtermpapersolutioncategory" name="midtermpapersolutioncategory">
+          <option value="Best">Best</option>
+          <option value="Average">Average</option>
+          <option value="Worst">Worst</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="midtermpapersolutioncomments">Comments (At least 3 based on the rubric)</label>
+        <textarea class="form-control" id="midtermpapersolutioncomments" name="midtermpapersolutioncomments" rows="4"></textarea>
+      </div>
+
+      <table class="table table-bordered mt-2" id="midtermpapersolution-table">
+        <thead>
+          <tr>
+            <th>Mid Term Paper File</th>
+            <th>Mark</th>
+            <th>Category</th>
+            <th>Comments</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dynamic rows will be inserted here -->
+        </tbody>
+      </table>
+
+      <button type="button" class="btn btn-primary" onclick="addmidtermpapersolutionfile()">Add Mid Term Paper Solution File</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+       </div>
+    </div>
+    
+    <div id="final-term-paper" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+  <div class="form-group">
+    <label for="{{ forms.final_term_paper_form.final_paper_file.id_for_label }}">Final Paper File</label>
+    {{ forms.final_term_paper_form.final_paper_file }}
+    {% if forms.final_term_paper_form.final_paper_file.errors %}
+      <div class="text-danger">{{ forms.final_term_paper_form.final_paper_file.errors }}</div>
+    {% endif %}
+  </div>
+
+
+
+
+        Final Term Paper File: 
+{% if forms.final_term_paper_form.instance.final_paper_file %}
+  <a href="{{ forms.final_term_paper_form.instance.final_paper_file.url }}" target="_blank">
+    {{ forms.final_term_paper_form.instance.final_paper_file.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+
+
+
+  <div class="form-group">
+    <label for="{{ forms.final_term_paper_form.final_solution_file.id_for_label }}">Final Solution Paper File</label>
+    {{ forms.final_term_paper_form.final_solution_file }}
+    {% if forms.final_term_paper_form.final_solution_file.errors %}
+      <div class="text-danger">{{ forms.final_term_paper_form.final_solution_file.errors }}</div>
+    {% endif %}
+  </div>
+
+
+
+  
+        Final Term Solution Paper File: 
+{% if forms.final_term_paper_form.instance.final_solution_file %}
+  <a href="{{ forms.final_term_paper_form.instance.final_solution_file.url }}" target="_blank">
+    {{ forms.final_term_paper_form.instance.final_solution_file.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+
+
+        <div class="container mt-5">
+  <h2  class="mb-0 d-flex justify-content-between align-items-center">Final Term Paper Solution File         <span id="finaltermpaper-span"></span>
+</h2>
+
+    <!-- Repeat this block for each assignment -->
+    <div class="card mb-4">
+      
+      <div class="card-body">
+        <div class="form-group">
+          <label for="finaltermsolutionpaperfile">Final Term Paper Solution File</label>
+          <input type="file" class="form-control" id="finaltermsolutionpaperfile" name="finaltermsolutionpaperfile">
+        </div>
+        <div class="form-group">
+          <label for="finaltermsolutionpapermarks">Marks (out of 10)</label>
+          <input type="number" class="form-control" id="finaltermsolutionpapermarks" name="finaltermsolutionpapermarks" placeholder="Enter marks out of 10">
+        </div>
+        <div class="form-group">
+          <label for="finaltermsolutionpapercategory">Category</label>
+          <select class="form-control" id="finaltermsolutionpapercategory" name="finaltermsolutionpapercategory">
+            <option value="Best">Best</option>
+            <option value="Average">Average</option>
+            <option value="Worst">Worst</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="finaltermsolutionpapercomments">Comments (At least 3 based on the rubric)</label>
+          <textarea class="form-control" id="finaltermsolutionpapercomments" name="finaltermsolutionpapercomments" rows="4"></textarea>
+        </div>
+        <table class="table table-bordered mt-2" id="finaltermpaper-table">
+          <thead>
+            <tr>
+              <th>Final Term Paper Solution File</th>
+              <th>Mark</th>
+              <th>Category</th>
+              <th>Comments</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button type="button" class="btn btn-primary" onclick="addfinaltermpapersolutionfile()">Add Final Term Paper Solution File</button>
+      </div>
+    </div>
+
+</div>
+
+
+
+
+       </div>
+    </div>
+    
+    
+    <div id="sessional-marks" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.sessional_marks_form}}
+
+        Sessional Marks File: 
+{% if forms.sessional_marks_form.instance.sessional_marks_file %}
+  <a href="{{ forms.sessional_marks_form.instance.sessional_marks_file.url }}" target="_blank">
+    {{ forms.sessional_marks_form.instance.sessional_marks_file.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+       </div>
+    </div>
+
+    
+    <div id="recommendations-suggestions" class="tab-content">
+      <!-- Course Objective content -->
+       <div class="form-group">
+        {{forms.recommendations_suggestions_form}}
+        Recommendations File: 
+{% if forms.recommendations_suggestions_form.instance.recommendationsandsuggestionsfile %}
+  <a href="{{ forms.recommendations_suggestions_form.instance.recommendationsandsuggestionsfile.url }}" target="_blank">
+    {{ forms.recommendations_suggestions_form.instance.recommendationsandsuggestionsfile.name }}
+  </a>
+{% else %}
+  No file uploaded.
+{% endif %}
+
+       </div>
+    </div>
+    
+    
+  <!-- Add these hidden inputs inside the form -->
+
+  
+<input type="hidden" name="assignment1" id="assignment1" value="[]">
+<input type="hidden" name="assignment2" id="assignment2" value="[]">
+<input type="hidden" name="assignment3" id="assignment3" value="[]">
+<input type="hidden" name="assignment4" id="assignment4" value="[]">
+<input type="hidden" name="quiz1" id="quiz1" value="[]">
+<input type="hidden" name="quiz2" id="quiz2" value="[]">
+<input type="hidden" name="quiz3" id="quiz3" value="[]">
+<input type="hidden" name="quiz4" id="quiz4" value="[]">
+<input type="hidden" name="presentation_data" id="presentation_data" value="[]">
+    <!-- Add remaining tab contents following same pattern -->
+    <input type="hidden" id="midtermpapersolution_data" name="midtermpapersolution_data" value="[]">
+
+    <input type="hidden" name="final_term_data" id="final_term_data">
+
+    <!-- Common form actions for all tabs -->
+    <div class="form-actions">
+      <button class="previous">Previous</button>
+      <button class="next">Next</button>
+    </div>
+  </div>
+</form>
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="submissionModal" tabindex="-1" aria-labelledby="submissionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="submissionModalLabel">Submit Your Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>You have reached the last section. Please submit your form.</p>
+        <p><strong>Semester Type:</strong> <span id="modalSemesterType"></span></p>
+        <p><strong>year:</strong> <span id="modalyear"></span></p>
+        <p><strong>Objectives:</strong> <span id="modalObjectives"></span></p>
+        <p><strong>Objective File:</strong> <span id="modalObjectiveFile"></span></p>
+        <p><strong>outline:</strong> <span id="modaloutline"></span></p>
+
+        <p><strong>Outline File:</strong> <span id="modalOutlineFile"></span></p>
+        <p><strong>Weekly Plan Topic:</strong> <span id="modalweeklyplantopic"></span></p>
+        <p><strong>Weekly Plan File:</strong> <span id="modalweeklyplanfile"></span></p>
+
+        <p><strong>Timetable File:</strong> <span id="modalTimetableFile"></span></p>
+        <p><strong>Attendance Record File:</strong> <span id="modalAttendanceRecordFile"></span></p>
+        <p><strong>Makeup Classes Topic:</strong> <span id="modalmakeupclasstopic"></span></p>
+        <p><strong>Makeup Classes File:</strong> <span id="modalmakeupclassfile"></span></p>
+        <p><strong>Counseling Hour Topic :</strong> <span id="modalcouselinghourtopic"></span></p>
+
+        <p><strong>Counseling Hour File:</strong> <span id="modalcouselinghourFile"></span></p>
+        
+        <p><strong>Lecture Notes :</strong> <span id="modalLectureNotestext"></span></p>
+
+        <p><strong>Lecture Notes File:</strong> <span id="modalLectureNotesFile"></span></p>
+        <p><strong>Reference Text:</strong> <span id="modalReferenceText"></span></p>
+
+        <p><strong>Reference File:</strong> <span id="modalReferenceFile"></span></p>
+        <p><strong>Mid Paper File:</strong> <span id="modalMidPaperFile"></span></p>
+        <p><strong>Mid Solution File:</strong> <span id="modalMidSolutionFile"></span></p>
+        <p><strong>Final Paper File:</strong> <span id="modalFinalPaperFile"></span></p>
+        <p><strong>Final Solution File:</strong> <span id="modalFinalSolutionFile"></span></p>
+        <p><strong>Sessional Marks File:</strong> <span id="modalSessionalMarksFile"></span></p>
+        <p><strong>Recommendations:</strong> <span id="modalRecommendations"></span></p>
+        <p><strong>Recommendations & Suggestions File:</strong> <span id="modalRecommendationsFile"></span></p>
+        
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitForm()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="alertPlaceholder" class="mt-3"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Correct Bootstrap 5 setup -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function collectTableData(tableId) {
+  const table = document.getElementById(tableId);
+  const rows = table.querySelectorAll("tbody tr");
+  const data = [];
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll("td");
+    if (cells.length >= 4) {
+      const rowData = {
+        file: cells[0].innerText.trim(),
+        marks_obtained: cells[1].innerText.trim(),
+        category: cells[2].innerText.trim(),
+        comments: cells[3].innerText.trim(),
+      };
+      data.push(rowData);
+    }
+  });
+
+  return JSON.stringify(data);
+}
+</script>
+<script>
+function prepareAssignmentData() {
+  document.getElementById("assignment1").value = collectTableData("assignment1-table");
+  document.getElementById("assignment2").value = collectTableData("assignment2-table");
+  document.getElementById("assignment3").value = collectTableData("assignment3-table");
+  document.getElementById("assignment4").value = collectTableData("assignment4-table");
+  document.getElementById("quiz1").value = collectTableData("quiz1-table");
+  document.getElementById("quiz2").value = collectTableData("quiz2-table");
+  document.getElementById("quiz3").value = collectTableData("quiz3-table");
+  document.getElementById("quiz4").value = collectTableData("quiz4-table");
+
+}
+</script>
+
+
+<script>
+  function addNewRow() {
+    const table = document.getElementById("presentation-table").getElementsByTagName('tbody')[0];
+    const newRow = table.insertRow();
+
+    // Create editable cells
+    for (let i = 0; i < 5; i++) {
+      const cell = newRow.insertCell();
+      cell.contentEditable = "true";
+      cell.innerText = ""; // empty for new row
+    }
+
+    // Delete button
+    const deleteCell = newRow.insertCell();
+    deleteCell.innerHTML = `<button type="button" onclick="deleteRow(this)">Delete</button>`;
+  }
+
+  function deleteRow(button) {
+    const row = button.closest("tr");
+    row.remove();
+  }
+
+  function gatherTableData() {
+    const rows = document.querySelectorAll("#presentation-table tbody tr");
+    const data = [];
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll("td");
+      if (cells.length >= 5) {
+        data.push({
+          group_name: cells[0].innerText.trim(),
+          topic: cells[1].innerText.trim(),
+          student_name: cells[2].innerText.trim(),
+          marks_obtained: cells[3].innerText.trim(),
+          comments: cells[4].innerText.trim()
+        });
+      }
+    });
+
+    document.getElementById("presentation_data").value = JSON.stringify(data);
+  }
+</script>
+
+
+<script>
+  let editingRow = null;
+
+  function editBtnquiz1(button) {
+    const row = button.closest('tr');
+    const cells = row.getElementsByTagName('td');
+
+    alert("You can't re-populate the file input for security reasons. Please re-upload the file if needed.");
+
+    document.getElementById('quiz1Marks').value = cells[1].innerText.trim();
+    document.getElementById('quiz1Category').value = cells[2].innerText.trim();
+    document.getElementById('quiz1Comments').value = cells[3].innerText.trim();
+
+    editingRow = row;
+  }
+
+  function addquiz1() {
+    const tableBody = document.getElementById('quiz1-table').getElementsByTagName('tbody')[0];
+
+    const fileInput = document.getElementById('quiz1file');
+    const marks = document.getElementById('quiz1Marks').value.trim();
+    const category = document.getElementById('quiz1Category').value.trim();
+    const comments = document.getElementById('quiz1Comments').value.trim();
+    const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : '';
+
+    if (!fileName && !editingRow) {
+      alert('Please select a file.');
+      return;
+    }
+
+    if (editingRow) {
+      // Update existing row
+      const cells = editingRow.getElementsByTagName('td');
+      if (fileName) cells[0].innerText = fileName; // Only update if new file selected
+      cells[1].innerText = marks;
+      cells[2].innerText = category;
+      cells[3].innerText = comments;
+      editingRow = null;
+    } else {
+      // Add new row
+      const newRow = tableBody.insertRow();
+      newRow.innerHTML = `
+        <td>${fileName}</td>
+        <td>${marks}</td>
+        <td>${category}</td>
+        <td>${comments}</td>
+      `;
+    }
+
+    // Reset form
+    document.getElementById('quiz1file').value = '';
+    document.getElementById('quiz1Marks').value = '';
+    document.getElementById('quiz1Category').value = '';
+    document.getElementById('quiz1Comments').value = '';
+  }
+</script>
+
+
+
+
+
+
+
+
+
+<script>
+  const tabIds = [
+    'academic-schedule',
+    'course-objective',
+    'course-outline',
+    'weekly-plan',
+    'timetable',
+    'attendance-record',
+    'record-of-makeup-classes',
+    'counseling-hours',
+    'lecture-notes',
+    'reference-materials',
+    'assignments',
+    'quizzes',
+    'presentations',
+    'mid-term-paper',
+    'final-term-paper',
+    'sessional-marks',
+    'recommendations-suggestions'
+  ];
+
+  let currentTabIndex = 0;
+  function showTab(index) {
+    currentTabIndex = Math.max(0, Math.min(index, tabIds.length - 1));
+
+    // Remove active/completed classes from all tabs
+    tabs.forEach(t => {
+      t.classList.remove('active', 'completed');
+    });
+    tabContent.forEach(c => c.classList.remove('active'));
+
+    // Add classes to appropriate tabs
+    tabs.forEach((tab, i) => {
+      if (i < currentTabIndex) {
+        tab.classList.add('completed');
+      }
+      if (i === currentTabIndex) {
+        tab.classList.add('active');
+      }
+    });
+
+    // Show current tab content
+    const tabId = tabIds[currentTabIndex];
+    document.getElementById(tabId).classList.add('active');
+
+    // Scroll to active tab
+    document.querySelector(`[data-tab='${tabId}']`).scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center'
+    });
+  }
+
+ 
+  // Initialize
+  const tabs = document.querySelectorAll('.wizard-header .tab');
+  const tabContent = document.querySelectorAll('.tab-content');
+  showTab(0);
+
+  // Add event listeners for tab clicks
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const clickedTabId = tab.dataset.tab;
+      const newIndex = tabIds.indexOf(clickedTabId);
+      showTab(newIndex);
+    });
+  });
+
+  // Handle "Next" button click
+  document.querySelectorAll('.next').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (currentTabIndex === tabIds.length - 1) {
+        gatherTableData();
+        prepareAssignmentData();
+        // Get the ID value from the element
+        const semesterType = document.getElementById('semester').value;
+        const year = document.getElementById('year').value;
+        const objectives=document.getElementById('id_objectives').value;
+        const objectivefile=document.getElementById('id_objectivefile').files[0];
+        const outline=document.getElementById('id_outline_text').value;
+        const outlinefile=document.getElementById('id_outlinefile').files[0];
+        const weeklyplantopic=document.getElementById('id_weeklyplantopic').value;
+        const weeklyplanfile=document.getElementById('id_weeklyplanfile').files[0];
+        
+        const counselinghourtopic=document.getElementById('id_counselinghourtopic').value;
+        const counselinghourfile=document.getElementById('id_counselinghourfile').files[0];
+        
+        
+        const timetablefile=document.getElementById('id_timetablefile').files[0];
+        const attendancerecordfile=document.getElementById('id_attendancerecordfile').files[0];
+        const makeupclasstopic=document.getElementById('id_makeupclasstopic').value;
+        const makeupclassfile=document.getElementById('id_makeupclassfile').files[0];
+        
+        const lecturenotes=document.getElementById('id_lecturenotes').value;
+        const lecturenotesfile=document.getElementById('id_lecturenotesfile').files[0];
+        const reference_text=document.getElementById('id_reference_text').value;
+        const referencefile=document.getElementById('id_referencefile').files[0];
+
+        const midpaperfile=document.getElementById('id_mid_paper_file').files[0];
+        const finalpaperfile=document.getElementById('id_final_paper_file').files[0];
+        const sessionalmarksfile=document.getElementById('id_sessional_marks_file').files[0];
+        const recommendations=document.getElementById('id_recommendations').value;
+        const recommendationsandsuggestionsfile=document.getElementById('id_recommendationsandsuggestionsfile').files[0];
+
+
+
+
+
+        
+
+
+        
+        
+        
+        
+        // Set it inside the modal
+
+        document.getElementById('modalSemesterType').textContent = semesterType;
+        document.getElementById('modalyear').textContent = year;
+
+        document.getElementById('modaloutline').textContent = outline;
+        document.getElementById('modalObjectives').textContent = objectives;
+
+        document.getElementById('modaloutline').textContent = outline;
+        document.getElementById('modalObjectives').textContent = objectives;
+        
+         
+        // For file inputs, you may want to show just the file name (since files themselves cannot be displayed as text)
+        document.getElementById('modalObjectiveFile').textContent = objectivefile ? objectivefile.name : 'No file selected';
+        document.getElementById('modalOutlineFile').textContent = outlinefile ? outlinefile.name : 'No file selected';
+        document.getElementById('modalTimetableFile').textContent = timetablefile ? timetablefile.name : 'No file selected';
+        document.getElementById('modalAttendanceRecordFile').textContent = attendancerecordfile ? attendancerecordfile.name : 'No file selected';
+        document.getElementById('modalweeklyplantopic').textContent = weeklyplantopic;
+        document.getElementById('modalweeklyplanfile').textContent = weeklyplanfile ? weeklyplanfile.name : 'No file selected';
+        document.getElementById('modalmakeupclasstopic').textContent = makeupclasstopic;
+        document.getElementById('modalmakeupclassfile').textContent = makeupclassfile ? makeupclassfile.name : 'No file selected';
+        
+        document.getElementById('modalcouselinghourtopic').textContent = counselinghourtopic;
+        document.getElementById('modalcouselinghourFile').textContent = counselinghourfile ? counselinghourfile.name : 'No file selected';
+        document.getElementById('modalLectureNotestext').textContent = lecturenotes;
+
+        document.getElementById('modalLectureNotesFile').textContent = lecturenotesfile ? lecturenotesfile.name : 'No file selected';
+        
+        document.getElementById('modalReferenceFile').textContent = referencefile ? referencefile.name : 'No file selected';
+        document.getElementById('modalMidPaperFile').textContent = midpaperfile ? midpaperfile.name : 'No file selected';
+        document.getElementById('modalFinalPaperFile').textContent = finalpaperfile ? finalpaperfile.name : 'No file selected';
+        document.getElementById('modalSessionalMarksFile').textContent = sessionalmarksfile ? sessionalmarksfile.name : 'No file selected';
+
+        document.getElementById('modalRecommendations').textContent = recommendations;
+        document.getElementById('modalRecommendationsFile').textContent = recommendationsandsuggestionsfile ? recommendationsandsuggestionsfile.name : 'No file selected';
+        
+        document.getElementById('modalReferenceText').textContent = reference_text;
+
+          
+        // Show Bootstrap modal
+        const modal = new bootstrap.Modal(document.getElementById('submissionModal'));
+        modal.show();
+      } else {
+        showTab(currentTabIndex + 1);
+      }
+    });
+  });
+  
+
+  // Handle "Previous" button click
+  document.querySelectorAll('.previous').forEach(btn => {
+    btn.addEventListener('click', () => showTab(currentTabIndex - 1));
+  });
+
+  // Form submission
+  function submitForm() {
+    const formData = new FormData();
+
+    // Get form values directly from input elements
+    formData.append("semester", document.getElementById('semester').value);
+    formData.append("year", document.getElementById('year').value);
+    formData.append("id_objectives", document.getElementById('id_objectives').value);
+    formData.append("id_outline_text", document.getElementById('id_outline_text').value);
+    formData.append("id_weeklyplantopic", document.getElementById('id_weeklyplantopic').value);
+    formData.append("id_counselinghourtopic", document.getElementById('id_counselinghourtopic').value);
+    formData.append("id_makeupclasstopic", document.getElementById('id_makeupclasstopic').value);
+    formData.append("id_lecturenotes", document.getElementById('id_lecturenotes').value);
+    formData.append("id_reference_text", document.getElementById('id_reference_text').value);
+    formData.append("id_recommendations", document.getElementById('id_recommendations').value);
+
+    // Handle file inputs
+    const fileInputs = {
+        'id_objectivefile': 'id_objectivefile',
+        'id_outlinefile': 'id_outlinefile',
+        'id_weeklyplanfile': 'id_weeklyplanfile',
+        'id_timetablefile': 'id_timetablefile',
+        'id_attendancerecordfile': 'id_attendancerecordfile',
+        'id_makeupclassfile': 'id_makeupclassfile',
+        'id_counselinghourfile': 'id_counselinghourfile',
+        'id_lecturenotesfile': 'id_lecturenotesfile',
+        'id_referencefile': 'id_referencefile',
+        'id_mid_paper_file': 'id_mid_paper_file',
+        'id_final_paper_file': 'id_final_paper_file',
+        'id_sessional_marks_file': 'id_sessional_marks_file',
+        'id_recommendationsandsuggestionsfile': 'id_recommendationsandsuggestionsfile'
+    };
+
+    // Add files to FormData if they exist
+    for (const [inputId, formFieldName] of Object.entries(fileInputs)) {
+        const fileInput = document.getElementById(inputId);
+        if (fileInput && fileInput.files.length > 0) {
+            formData.append(formFieldName, fileInput.files[0]);
+        }
+    }
+
+    // Add JSON data
+const assignment1= document.getElementById('assignment1').value;
+    formData.append('assignment1', assignment1);
+    const assignment2 = document.getElementById('assignment2').value;
+    formData.append('assignment2', assignment2);
+    const assignment3 = document.getElementById('assignment3').value;
+    formData.append('assignment3', assignment3);
+    const assignment4 = document.getElementById('assignment4').value;
+    formData.append('assignment4', assignment4);
+    const quiz1 = document.getElementById('quiz1').value;
+    formData.append('quiz1', quiz1);
+    const quiz2 = document.getElementById('quiz2').value;
+    formData.append('quiz2', quiz2);
+    const quiz3 = document.getElementById('quiz3').value;
+    formData.append('quiz3', quiz3);
+    const quiz4 = document.getElementById('quiz4').value;
+    formData.append('quiz4', quiz4);
+const presentationData = document.getElementById('presentation_data').value;
+    formData.append('presentation_data', presentationData);
+    const path = window.location.pathname;
+    console.log(path);
+
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Send the form data
+    fetch(window.location.pathname, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Hide the modal
+            var myModal = new bootstrap.Modal(document.getElementById('submissionModal'));
+            myModal.hide();
+
+            // Show success message
+            document.getElementById('alertPlaceholder').innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    Form Submitted Successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+
+            // Redirect after 2 seconds
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        } else {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("An error occurred while submitting the form. Please try again.");
+    });
+}
+
+// Function to get CSRF token from the page (for security)
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+</script>
+
+<script>
+function addfinaltermpapersolutionfile() {
+
+    const table = document.getElementById('finaltermpaper-table').getElementsByTagName('tbody')[0];
+
+    if (table.rows.length >= 3) {
+        alert("You can only add up to 3 entries.");
+        
+        return;
+    }
+    
+    
+    
+
+    const fileInput = document.getElementById('finaltermsolutionpaperfile');
+    const marksInput = document.getElementById('finaltermsolutionpapermarks');
+    const categorySelect = document.getElementById('finaltermsolutionpapercategory');
+    const commentsInput = document.getElementById('finaltermsolutionpapercomments');
+
+    const fileName = fileInput.files[0]?.name || 'No file selected';
+    const marks = marksInput.value;
+    const category = categorySelect.value;
+    const comments = commentsInput.value;
+
+    // Append new row to the table
+    const newRow = table.insertRow();
+    newRow.insertCell(0).innerText = fileName;
+    newRow.insertCell(1).innerText = marks;
+    newRow.insertCell(2).innerText = category;
+    newRow.insertCell(3).innerText = comments;
+const span = document.getElementById('finaltermpaper-span');
+    if (table.rows.length === 3) {
+        span.innerHTML = '✅'; 
+        span.style.color = 'green';
+    } else {
+        span.innerHTML = '';
+    }
+
+
+    // Create JSON array from table
+    const data = [];
+    for (let row of table.rows) {
+        data.push({
+            file: row.cells[0].innerText,
+            marks: row.cells[1].innerText,
+            category: row.cells[2].innerText,
+            comments: row.cells[3].innerText
+        });
+    }
+
+    // Store data as JSON string in hidden input
+    document.getElementById('final_term_data').value = JSON.stringify(data);
+
+    // Optionally clear inputs
+    fileInput.value = '';
+    marksInput.value = '';
+    categorySelect.selectedIndex = 0;
+    commentsInput.value = '';
+
+}
+</script>
+<script>
+
+function addmidtermpapersolutionfile() {
+    const table = document.getElementById('midtermpapersolution-table').getElementsByTagName('tbody')[0];
+
+    if (table.rows.length >= 3) {
+        alert("You can only add up to 3 mid-term paper entries.");
+        return;
+    }
+
+    const fileInput = document.getElementById('midtermpapersolutionfile');
+    const marksInput = document.getElementById('midtermpapersolutionmarks');
+    const categorySelect = document.getElementById('midtermpapersolutioncategory');
+    const commentsInput = document.getElementById('midtermpapersolutioncomments');
+const file = fileInput.files[0];
+    if (!file) {
+        alert("Please select a file!");
+        return;
+    }
+    const fileName = fileInput.files[0]?.name || 'No file selected';
+    const marks = marksInput.value;
+    const category = categorySelect.value;
+    const comments = commentsInput.value;
+
+
+
+    
+    const newRow = table.insertRow();
+    newRow.insertCell(0).innerText = fileName;
+    newRow.insertCell(1).innerText = marks;
+    newRow.insertCell(2).innerText = category;
+    newRow.insertCell(3).innerText = comments;
+
+    const span = document.getElementById('midtermpaper-span');
+    if (table.rows.length === 3) {
+        span.innerHTML = '✅';
+        span.style.color = 'green';
+    } else {
+        span.innerHTML = '';
+    }
+
+    // Create JSON array from table rows
+    const data = [];
+    for (let row of table.rows) {
+        data.push({
+            file: row.cells[0].innerText,
+            marks: row.cells[1].innerText,
+            category: row.cells[2].innerText,
+            comments: row.cells[3].innerText
+        });
+    }
+
+
+    // Store JSON string in hidden input
+    document.getElementById('midtermpapersolution_data').value = JSON.stringify(data);
+
+    // Clear inputs
+    fileInput.value = '';
+    marksInput.value = '';
+    categorySelect.selectedIndex = 0;
+    commentsInput.value = '';
+}
+
+</script>
+  
+<script>
+  // Function to add data to the table
+  function addData() {
+      // Get input values
+      let groupName = document.getElementById("id_group_name").value;
+      let topic = document.getElementById("id_topic").value;
+      let studentName = document.getElementById("id_student_name").value;
+      let marksObtained = document.getElementById("id_marks_obtained").value;
+      let comments = document.getElementById("id_comments").value;
+  
+      // Get the table and insert a new row at the end
+      let table = document.getElementById("presentation-table");
+      
+      let tbody = table.querySelector("tbody");  
+      let newRow = tbody.insertRow(); 
+      
+      // Insert data into cells of the new row
+      newRow.insertCell(0).innerHTML = groupName;
+      newRow.insertCell(1).innerHTML = topic;
+      newRow.insertCell(2).innerHTML = studentName;
+      newRow.insertCell(3).innerHTML = marksObtained;
+      newRow.insertCell(4).innerHTML = comments;
+      newRow.insertCell(5).innerHTML =
+          '<button onclick="deleteData(this)">Delete</button>';
+  
+      // Clear input fields after adding the data
+      clearInputs();
+  }
+  
+  // Function to clear input fields
+  function clearInputs() {
+      document.getElementById("id_group_name").value = '';
+      document.getElementById("id_topic").value = '';
+      document.getElementById("id_student_name").value = '';
+      document.getElementById("id_marks_obtained").value = '';
+      document.getElementById("id_comments").value = '';
+  }
+  
+  
+  function deleteData(button) {
+      // Implement your delete logic here
+      let row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+  }
+  </script>
+  <style>
+    /* Add this CSS */
+    .wizard-header .tab.completed {
+      background-color: #28a745; /* Green color */
+      color: #fff;
+    }
+  </style>
+  
+  <style>
+    .wizard-header {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scroll-behavior: smooth; /* For smooth scrolling */
+      /* ... other styles ... */
+  }
+  </style>
+  <script>
+    // Function to add data to the table
+    function addmarkup() {
+        // Get input values
+        let date = document.getElementById("id_date").value;
+        let startdate = document.getElementById("id_start_time").value;
+        let enddate = document.getElementById("id_end_time").value;
+        let ismakeupclass = document.getElementById("id_is_makeup_class").value;
+
+    
+        // Get the table and insert a new row at the end
+        let table = document.getElementById("makeup-table");
+        let tbody = table.querySelector("tbody"); // Select tbody instead of the entire table
+
+        let newRow = tbody.insertRow(); 
+        
+        // Insert data into cells of the new row
+        newRow.insertCell(0).innerHTML = date;
+        newRow.insertCell(1).innerHTML = startdate;
+        newRow.insertCell(2).innerHTML = enddate;
+        newRow.insertCell(3).innerHTML = ismakeupclass;
+        
+        newRow.insertCell(4).innerHTML =
+            '<button onclick="deleteData(this)">Delete</button>';
+    
+        // Clear input fields after adding the data
+        clearInputs();
+    }
+    
+    // Function to clear input fields
+    function clearInputs() {
+      
+      document.getElementById("id_date").value;
+       document.getElementById("id_start_time").value;
+      document.getElementById("id_end_time").value;
+      document.getElementById("id_is_makeup_class").value;
+
+    }
+    
+    
+    function deleteData(button) {
+        // Implement your delete logic here
+        let row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+    </script>
+  
+
+    
+     <script>
+    // Function to add data to the table for assignment 1
+    function addassignment1() {
+        let assignment1file = document.getElementById("assignment1file").value;
+        let assignment1Marks = document.getElementById("assignment1Marks").value;
+        let assignment1Category = document.getElementById("assignment1Category").value;
+        let assignment1Comments = document.getElementById('assignment1Comments').value;
+        let tbody = document.querySelector("#assignment1-table tbody");
+
+
+        if (tbody.rows.length >= 4) {
+            alert("You can't add more than 4 assignments.");
+            return;
+        }
+
+        let newRow =tbody.insertRow();
+        newRow.insertCell(0).innerHTML = assignment1file;
+        newRow.insertCell(1).innerHTML = assignment1Marks;
+        newRow.insertCell(2).innerHTML = assignment1Category;
+        newRow.insertCell(3).innerHTML = assignment1Comments;
+        newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+        clearInputs(1);
+    }
+
+    // Function to add data to the table for assignment 2
+    function addassignment2() {
+        let assignment2file = document.getElementById("assignment2file").value;
+        let assignment2Marks = document.getElementById("assignment2Marks").value;
+        let assignment2Category = document.getElementById("assignment2Category").value;
+        let assignment2Comments = document.getElementById('assignment2Comments').value;
+        let tbody = document.querySelector("#assignment2-table tbody");
+
+
+        if (tbody.rows.length >= 4) {
+            alert("You can't add more than 4 assignments.");
+            return;
+        }
+
+        let newRow = tbody.insertRow();
+        newRow.insertCell(0).innerHTML = assignment2file;
+        newRow.insertCell(1).innerHTML = assignment2Marks;
+        newRow.insertCell(2).innerHTML = assignment2Category;
+        newRow.insertCell(3).innerHTML = assignment2Comments;
+        newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+        clearInputs(2);
+    }
+
+    // Function to add data to the table for assignment 3
+    function addassignment3() {
+        let assignment3file = document.getElementById("assignment3file").value;
+        let assignment3Marks = document.getElementById("assignment3Marks").value;
+        let assignment3Category = document.getElementById("assignment3Category").value;
+        let assignment3Comments = document.getElementById('assignment3Comments').value;
+
+        let tbody = document.querySelector("#assignment3-table tbody");
+
+        if (tbody.rows.length >= 4) {
+            alert("You can't add more than 4 assignments.");
+            return;
+        }
+
+        let newRow = tbody.insertRow();
+        newRow.insertCell(0).innerHTML = assignment3file;
+        newRow.insertCell(1).innerHTML = assignment3Marks;
+        newRow.insertCell(2).innerHTML = assignment3Category;
+        newRow.insertCell(3).innerHTML = assignment3Comments;
+        newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+        clearInputs(3);
+    }
+
+    // Function to add data to the table for assignment 4
+    function addassignment4() {
+        let assignment4file = document.getElementById("assignment4file").value;
+        let assignment4Marks = document.getElementById("assignment4Marks").value;
+        let assignment4Category = document.getElementById("assignment4Category").value;
+        let assignment4Comments = document.getElementById('assignment4Comments').value;
+        let tbody = document.querySelector("#assignment4-table tbody");
+
+
+        if (tbody.rows.length >= 4) {
+            alert("You can't add more than 4 assignments.");
+            return;
+        }
+
+        let newRow = tbody.insertRow();
+        newRow.insertCell(0).innerHTML = assignment4file;
+        newRow.insertCell(1).innerHTML = assignment4Marks;
+        newRow.insertCell(2).innerHTML = assignment4Category;
+        newRow.insertCell(3).innerHTML = assignment4Comments;
+        newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+        clearInputs(4);
+    }
+
+    // Function to clear input fields
+    function clearInputs(assignmentNumber) {
+        document.getElementById(`assignment${assignmentNumber}file`).value = '';
+        document.getElementById(`assignment${assignmentNumber}Marks`).value = '';
+        document.getElementById(`assignment${assignmentNumber}Category`).value = '';
+        document.getElementById(`assignment${assignmentNumber}Comments`).value = '';
+    }
+
+    // Function to delete data (row)
+    function deleteData(button) {
+        let row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+    }
+</script>
+<script>
+  // Function to add data to the table for quiz 1
+  function addquiz1() {
+      let quiz1file = document.getElementById("quiz1file").value;
+      let quiz1Marks = document.getElementById("quiz1Marks").value;
+      let quiz1Category = document.getElementById("quiz1Category").value;
+      let quiz1Comments = document.getElementById('quiz1Comments').value;
+
+      let tbody = document.querySelector("#quiz1-table tbody");
+
+      if (tbody.rows.length >= 4) {
+          alert("You can't add more than 4 quizzes.");
+          return;
+      }
+
+      let newRow = tbody.insertRow();
+      newRow.insertCell(0).innerHTML = quiz1file;
+      newRow.insertCell(1).innerHTML = quiz1Marks;
+      newRow.insertCell(2).innerHTML = quiz1Category;
+      newRow.insertCell(3).innerHTML = quiz1Comments;
+      newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+      clearInputs(1);
+  }
+
+  // Function to add data to the table for quiz 2
+  function addquiz2() {
+      let quiz2file = document.getElementById("quiz2file").value;
+      let quiz2Marks = document.getElementById("quiz2Marks").value;
+      let quiz2Category = document.getElementById("quiz2Category").value;
+      let quiz2Comments = document.getElementById('quiz2Comments').value;
+      let tbody = document.querySelector("#quiz2-table tbody");
+
+
+      if (tbody.rows.length >= 4) {
+          alert("You can't add more than 4 quizzes.");
+          return;
+      }
+
+      let newRow = tbody.insertRow();
+      newRow.insertCell(0).innerHTML = quiz2file;
+      newRow.insertCell(1).innerHTML = quiz2Marks;
+      newRow.insertCell(2).innerHTML = quiz2Category;
+      newRow.insertCell(3).innerHTML = quiz2Comments;
+      newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+      clearInputs(2);
+  }
+
+  // Function to add data to the table for quiz 3
+  function addquiz3() {
+      let quiz3file = document.getElementById("quiz3file").value;
+      let quiz3Marks = document.getElementById("quiz3Marks").value;
+      let quiz3Category = document.getElementById("quiz3Category").value;
+      let quiz3Comments = document.getElementById('quiz3Comments').value;
+
+      let tbody = document.querySelector("#quiz3-table tbody");
+
+      if (tbody.rows.length >= 4) {
+          alert("You can't add more than 4 quizzes.");
+          return;
+      }
+
+      let newRow = tbody.insertRow();
+      newRow.insertCell(0).innerHTML = quiz3file;
+      newRow.insertCell(1).innerHTML = quiz3Marks;
+      newRow.insertCell(2).innerHTML = quiz3Category;
+      newRow.insertCell(3).innerHTML = quiz3Comments;
+      newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+      clearInputs(3);
+  }
+
+  // Function to add data to the table for quiz 4
+  function addquiz4() {
+      let quiz4file = document.getElementById("quiz4file").value;
+      let quiz4Marks = document.getElementById("quiz4Marks").value;
+      let quiz4Category = document.getElementById("quiz4Category").value;
+      let quiz4Comments = document.getElementById('quiz4Comments').value;
+
+      let tbody = document.querySelector("#quiz4-table tbody");
+
+      if (tbody.rows.length >= 4) {
+          alert("You can't add more than 4 quizzes.");
+          return;
+      }
+
+      let newRow = tbody.insertRow();
+      newRow.insertCell(0).innerHTML = quiz4file;
+      newRow.insertCell(1).innerHTML = quiz4Marks;
+      newRow.insertCell(2).innerHTML = quiz4Category;
+      newRow.insertCell(3).innerHTML = quiz4Comments;
+      newRow.insertCell(4).innerHTML = '<button onclick="deleteData(this)">Delete</button>';
+
+      clearInputs(4);
+  }
+
+  // Function to clear input fields
+  function clearInputs(quizNumber) {
+      document.getElementById(`quiz${quizNumber}file`).value = '';
+      document.getElementById(`quiz${quizNumber}Marks`).value = '';
+      document.getElementById(`quiz${quizNumber}Category`).value = '';
+      document.getElementById(`quiz${quizNumber}Comments`).value = '';
+  }
+
+  // Function to delete data (row)
+  function deleteData(button) {
+      let row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+  }
+</script>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  {% comment %} <script>
+    /********************************************
+     * Tab switching & file input label updates *
+     ********************************************/
+    // Array of tab IDs in order
+    const tabIds = [
+      'academic-info',
+      'AcademicSchedule',
+      'quizzes',
+      'assignments',
+      'mid-term',
+      'final-term',
+      'attendance',
+      'timetable'
+    ];
+    let currentTabIndex = 0; // academic-info is the first tab
+
+    const tabs       = document.querySelectorAll('.wizard-header .tab');
+    const tabContent = document.querySelectorAll('.tab-content');
+
+    // Show the specified tab (by index)
+    function showTab(index) {
+      // Clamp the index to [0, tabIds.length-1]
+      currentTabIndex = Math.max(0, Math.min(index, tabIds.length - 1));
+      
+      // Remove 'active' from all tabs and hide all tab contents
+      tabs.forEach(t => t.classList.remove('active'));
+      tabContent.forEach(c => c.classList.remove('active'));
+
+      // Add 'active' to the correct tab and content
+      const tabId = tabIds[currentTabIndex];
+      document.querySelector(`.wizard-header .tab[data-tab='${tabId}']`).classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Next/Previous handlers
+    function nextTab() {
+      showTab(currentTabIndex + 1);
+    }
+    function prevTab() {
+      showTab(currentTabIndex - 1);
+    }
+
+    // Setup click on tabs (header)
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        // Find which tab index we clicked
+        const clickedTabId = tab.getAttribute('data-tab');
+        const newIndex = tabIds.indexOf(clickedTabId);
+        showTab(newIndex);
+      });
+    });
+
+    // Setup click on Next/Previous in each tab
+    document.querySelectorAll('.form-actions .next').forEach(btn => {
+      btn.addEventListener('click', nextTab);
+    });
+    document.querySelectorAll('.form-actions .previous').forEach(btn => {
+      btn.addEventListener('click', prevTab);
+    });
+
+    // Initially show the first tab (index 0)
+    showTab(0);
+
+    // File input label updates
+    function setupFileLabel(fileInputId, labelId) {
+      const fileInput = document.getElementById(fileInputId);
+      const labelSpan = document.getElementById(labelId);
+      if (!fileInput || !labelSpan) return;
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files.length > 0) {
+          labelSpan.textContent = fileInput.files[0].name;
+        } else {
+          labelSpan.textContent = 'No file chosen';
+        }
+      });
+    } 
+
+    
+  </script> {% endcomment %}
+
+</body>
+</html>
+
+
+{% endblock content %} 

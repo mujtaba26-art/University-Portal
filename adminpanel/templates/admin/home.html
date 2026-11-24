@@ -1,0 +1,661 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
+            --background: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text: #0f172a;
+            --draft: #3b82f6;
+            --submitted: #22c55e;
+            --returned: #ef4444;
+            --completed: #10b981;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --background: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text: #f8fafc;
+            --draft: #60a5fa;
+            --submitted: #4ade80;
+            --returned: #f87171;
+            --completed: #34d399;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 1rem;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            border: 2px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* Status Indicators */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .status {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 4px solid;
+            cursor: pointer;
+        }
+
+        .status h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .status p {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .draft {
+            border-color: var(--draft);
+            background: var(--card-bg);
+        }
+
+        .submitted {
+            border-color: var(--submitted);
+            background: var(--card-bg);
+        }
+
+        .returned {
+            border-color: var(--returned);
+            background: var(--card-bg);
+        }
+
+        /* Submission Status Overview */
+        .graph-container {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graph-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--completed) 25%,
+                var(--draft) 25% 50%,
+                var(--submitted) 50% 75%,
+                var(--returned) 75%);
+        }
+
+        .graph {
+            display: flex;
+            height: 200px;
+            gap: 1.5rem;
+            align-items: flex-end;
+            justify-content: center;
+            padding-top: 2rem;
+        }
+
+        .bar {
+            width: 60px;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            background: linear-gradient(to bottom,
+                rgba(255,255,255,0.15) 0%,
+                rgba(0,0,0,0.15) 100%);
+            box-shadow: var(--shadow);
+            animation: bar-rise 0.8s ease-out forwards;
+        }
+
+        .bar::after {
+            content: attr(data-status);
+            position: absolute;
+            bottom: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .bar::before {
+            content: attr(data-percentage);
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .bar:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .bar:hover::before {
+            opacity: 1;
+        }
+
+        .completed { background-color: var(--completed); }
+        .draft-chart { background-color: var(--draft); }
+        .submitted-chart { background-color: var(--submitted); }
+        .returned-chart { background-color: var(--returned); }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        @keyframes bar-rise {
+            from { height: 0; }
+            to { height: var(--height); }
+        }
+
+        /* Preview Section */
+        .preview-section {
+            margin-top: 2rem;
+        }
+
+        #pdfPreview {
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        /* Coordinator Section */
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        select, input {
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            background: var(--card-bg);
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-container {
+            position: relative;
+            flex: 2;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+        }
+
+        /* Chat Section */
+        .chat-container {
+            margin-top: 2rem;
+        }
+
+        .chat-messages {
+            height: 300px;
+            padding: 1rem;
+            overflow-y: auto;
+            background: var(--background);
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .message {
+            background: var(--card-bg);
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            max-width: 80%;
+            box-shadow: var(--shadow);
+        }
+
+        .message.admin {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            .status {
+                padding: 1rem;
+            }
+
+            .graph {
+                flex-wrap: wrap;
+                height: auto;
+                gap: 1rem;
+                padding-top: 1rem;
+            }
+
+            .bar {
+                width: 25%;
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>Course Management Dashboard</h1>
+        <button class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            Create User
+        </button>
+
+        <button class="btn btn-primary">
+            <i class="fas fa-save"></i>
+Create Course Folder
+        </button>
+        
+        <button class="btn btn-primary">
+            <i class="fas fa-save"></i>
+Assign Course Folder        </button>
+        
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <!-- Faculty View -->
+        <div class="card faculty-section">
+            <h2>Course Folder Management <i class="fas fa-folder-open"></i></h2>
+
+            <div class="status-grid">
+                <div class="status draft" onclick="showPreview('draft')">
+                    <h3>Draft</h3>
+                    <p>3 Items</p>
+                </div>
+                <div class="status submitted" onclick="showPreview('submitted')">
+                    <h3>Submitted</h3>
+                    <p>5 Items</p>
+                </div>
+                <div class="status returned" onclick="showPreview('returned')">
+                    <h3>Returned</h3>
+                    <p>2 Items</p>
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <div class="card coordinator-section">
+                    <h2>Document Coordination <i class="fas fa-tasks"></i></h2>
+        
+                    <div class="filters">
+                        <select>
+                            <option>Computer Science</option>
+                            <option>Lab Classes</option>
+                            <option>Theory Classes</option>
+                        </select>
+                        <select>
+                            <option>All Semesters</option>
+                            <option>Semester 1</option>
+                            <option>Semester 2</option>
+                        </select>
+                        <div class="search-container">
+                            <input type="text" placeholder="Search faculty..."
+                                   oninput="showSearchResults(this.value)"
+                                   style="padding-left: 2.5rem;">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+        
+                    <!-- Submission Status Overview -->
+                    <div class="graph-container">
+                        <h3>Submission Status Overview</h3>
+                        <div class="graph">
+                            <div class="bar completed"
+                                 style="--height: 85%"
+                                 data-percentage="35%"
+                                 data-status="Completed"></div>
+                            <div class="bar draft-chart"
+                                 style="--height: 65%"
+                                 data-percentage="25%"
+                                 data-status="Draft"></div>
+                            <div class="bar submitted-chart"
+                                 style="--height: 45%"
+                                 data-percentage="20%"
+                                 data-status="Submitted"></div>
+                            <div class="bar returned-chart"
+                                 style="--height: 30%"
+                                 data-percentage="20%"
+                                 data-status="Returned"></div>
+                        </div>
+        
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--completed)"></div>
+                                <span>Completed</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--draft)"></div>
+                                <span>Draft</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--submitted)"></div>
+                                <span>Submitted</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: var(--returned)"></div>
+                                <span>Returned</span>
+                            </div>
+                        </div>
+                    </div>
+        
+        </div>        
+                     </div>
+        </div>
+
+        <!-- Coordinator View -->
+            <div class="chat-container">
+                <h3>Real-time Communication</h3>
+                <select id="userSelect" onchange="loadChatHistory()">
+                    <option value="user1">User 1</option>
+                    <option value="user2">User 2</option>
+                    <option value="user3">User 3</option>
+                </select>
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will be dynamically loaded here -->
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <input type="text" id="chatInput" placeholder="Type message..."
+                           style="flex: 1; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                    <button onclick="sendMessage()" style="padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="filters">
+        <select id="teacherSelect" class="form-select">
+            <option value="">Select a teacher</option>
+            {% for teacher in teachers %}
+                <option value="{{ teacher.id }}">{{ teacher.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <div class="chat-container">
+        <div id="chatMessages" class="chat-messages"></div>
+    
+        <div class="input-group">
+            <input type="text" id="messageInput" class="form-control" placeholder="Type a message...">
+            <button id="sendMessageBtn" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+    let selectedTeacherId = null;
+    
+    $("#teacherSelect").change(function () {
+        selectedTeacherId = $(this).val();
+        if (selectedTeacherId) {
+            $.post("/get-messages/", { teacher_id: selectedTeacherId }, function (data) {
+                let chatHtml = "";
+                data.messages.forEach(msg => {
+                    const cls = msg.is_admin ? "message admin" : "message";
+                    chatHtml += `<div class="${cls}">${msg.content}</div>`;
+                });
+                $("#chatMessages").html(chatHtml);
+            });
+        }
+    });
+    
+    $("#sendMessageBtn").click(function () {
+        const content = $("#messageInput").val();
+        if (!selectedTeacherId || !content.trim()) return;
+    
+        $.post("/send-message/", {
+            receiver_id: selectedTeacherId,
+            content: content,
+        }, function () {
+            $("#messageInput").val("");
+            $("#teacherSelect").change(); // Refresh messages
+        });
+    });
+    </script>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        $.ajaxSetup({
+            headers: { "X-CSRFToken": getCookie("csrftoken") }
+        });
+    </script>
+    
+    <script>
+        // Theme Toggle
+        function toggleTheme() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Set initial theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+
+        // Preview Functionality
+        const previews = {
+            draft: '<embed src="path/to/draft.pdf" type="application/pdf" width="100%" height="400px">',
+            submitted: '<embed src="path/to/submitted.pdf" type="application/pdf" width="100%" height="400px">',
+            returned: '<embed src="path/to/returned.pdf" type="application/pdf" width="100%" height="400px">'
+        };
+
+        function showPreview(status) {
+            document.getElementById('pdfPreview').innerHTML = previews[status];
+        }
+
+        // Search Functionality
+        const facultyList = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson'];
+
+        function showSearchResults(query) {
+            // Implement search logic here
+        }
+
+        // Chat Functionality
+        const chatHistory = {
+            user1: [
+                { sender: 'admin', text: 'Please update the course materials by Friday', time: '2:45 PM' },
+                { sender: 'user', text: 'Understood, will do!', time: '2:46 PM' }
+            ],
+            user2: [
+                { sender: 'admin', text: 'Remember to submit your report.', time: '3:00 PM' },
+                { sender: 'user', text: 'Sure, I will submit it soon.', time: '3:05 PM' }
+            ],
+            user3: [
+                { sender: 'admin', text: 'Check your email for the latest updates.', time: '4:15 PM' },
+                { sender: 'user', text: 'Got it, thanks!', time: '4:20 PM' }
+            ]
+        };
+
+        function loadChatHistory() {
+            const user = document.getElementById('userSelect').value;
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = '';
+
+            chatHistory[user].forEach(message => {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', message.sender);
+                messageDiv.innerHTML = `${message.text} <div class="message-time">${message.time}</div>`;
+                messagesContainer.appendChild(messageDiv);
+            });
+        }
+
+        function sendMessage() {
+            const user = document.getElementById('userSelect').value;
+            const input = document.getElementById('chatInput');
+            const messageText = input.value;
+            const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (messageText.trim() !== '') {
+                chatHistory[user].push({ sender: 'admin', text: messageText, time: currentTime });
+                loadChatHistory();
+                input.value = '';
+            }
+        }
+
+        // Load initial chat history
+        loadChatHistory();
+    </script>
+
+    <select id="teacher-select" class="form-select">
+        <option value="">Select a teacher</option>
+        {% for teacher in teachers %}
+            <option value="{{ teacher.id }}">{{ teacher.username }}</option>
+        {% endfor %}
+    </select>
+    
+    <div id="chat-box" class="chat-messages"></div>
+    
+    <script>
+        $('#teacher-select').on('change', function() {
+            const teacherId = $(this).val();
+            if (teacherId) {
+                $.ajax({
+                    url: '{% url "get_messages" %}',  // Make sure this URL is configured in urls.py
+                    data: { receiver_id: teacherId },
+                    success: function(response) {
+                        let chatBox = $('#chat-box');
+                        chatBox.empty();
+                        response.messages.forEach(msg => {
+                            const messageClass = msg.is_admin ? 'admin' : '';
+                            chatBox.append(`<div class="message ${messageClass}">${msg.sender}: ${msg.content}</div>`);
+                        });
+                        chatBox.scrollTop(chatBox[0].scrollHeight);
+                    }
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>

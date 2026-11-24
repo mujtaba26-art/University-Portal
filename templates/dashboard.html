@@ -1,0 +1,284 @@
+{% extends "base-teacher.html" %}
+{% load static %}
+{% block content %}
+{% if show_modal %}
+
+
+<script>
+  function checkstatus(){
+  var status=document.getElementById('status').value;
+  console.log(status);
+  if(status=='visiting'){
+      document.getElementById('emp-id').style.display='none';
+  }
+  else{
+      document.getElementById('emp-id').style.display='block';
+  }
+}
+function checkfacultytype(){
+  var facultytype=document.getElementById('facultytype').value;
+  if(facultytype=='shared'){
+    document.getElementById('departmental').style.display='none';
+}
+else{
+    document.getElementById('departmental').style.display='block';
+}
+}
+</script>
+  <!-- Modal -->
+  <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProfileModalLabel">Profile</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Custom Form -->
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+              <input type="text" placeholder="Enter Your Name" class="form-control" name="name">
+            </div>
+            <div class="mb-3">
+              <input type="text" placeholder="Your Designation" class="form-control" name="designation">
+            </div>
+            <div class="mb-3">
+              <select class="form-select" id="status" onchange="checkstatus()" name="status">
+                <option value="your_status">Your Status</option>
+                <option value="visiting">Visiting</option>
+                <option value="permanent">Permanent</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <input type="text" placeholder="Your Emp ID" name="employeid" id="emp-id" class="form-control emp-id">
+            </div>
+            <div class="mb-3">
+              <select class="form-select" id='facultytype' name="facultytype" onchange="checkfacultytype()">
+                <option value='shared'>Shared</option>
+                <option value='departmental'>Departmental</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <input type="text" id='departmental' name="departmental" placeholder="e.g Basic Sciences" class="form-control">
+            </div>
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value="Submit">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Include Bootstrap CSS (in the head) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Include Bootstrap JS (before the closing body tag) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Wait for the DOM to fully load
+document.addEventListener("DOMContentLoaded", function() {
+    var myModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+    myModal.show();
+  });
+  
+</script>
+
+{% else %}
+
+  <!-- DASHBOARD CONTENT -->
+  <div class="dashboard-content">
+    <div id="notification-bell">
+  <i class="fa fa-bell"></i>
+  <span id="notification-count" class="badge bg-danger" style="display:none;">0</span>
+</div>
+<div id="notification-list" style="display:none;"></div>
+
+    <!-- Teacher / Employee Info Card -->
+    <div class="teacher-card">
+      {% if profile %}
+      {% if profile.profile_picture %}
+      <img src="{{ profile.profile_picture.url }}" alt="Teacher Photo">
+
+      {% else %}
+      <img src="https://placehold.co/600x400" alt="Teacher Photo">
+
+      {% endif %}
+    {% else %}
+      <p>No photo available.</p>
+    {% endif %}
+    
+      <div class="info">
+        <h2>{{profile.user.username}} ({{profile.designation}})</h2>
+        <span>Employee ID:{{profile.employe_id}}</span>
+        <span>Department of {{profile.department_from}}</span>
+        <span>Experience:{{profile.experience}} </span>
+        <span>Contact: {{profile.cell_no}}</span>
+        <span>Email: {{profile.user.email}}</span>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4>Total Courses</h4>
+        <div class="value">{{total_course}}</div>
+      </div>
+      <div class="stat-card">
+        <h4>Draft Folders</h4>
+        <div class="value">{{total_pending}}</div>
+      </div>
+      <div class="stat-card">
+        <h4>Approved Folders</h4>
+        <div class="value">{{total_approved}}</div>
+      </div>
+      <div class="stat-card">
+        <h4>Returned Folders</h4>
+        <div class="value">{{total_rejected}}</div>
+      </div>
+      {% comment %} <div class="stat-card">
+        <h4>Notifications</h4>
+        <div class="value">8</div>
+      </div> {% endcomment %}
+    </div>
+
+    <!-- Allotted Course Folders -->
+    <div class="section-header">Allotted Course Folders</div>
+    <div class="card-grid">
+{% if subjects %}
+      {% for i in subjects %}
+      {% if i.status == 'assign' %}
+<a href='{% url "upload_folder" i.id i.subject_name %}' style='text-decoration:none;'>
+      <div class="folder-card" style='background-color:{{i.color}}; '>
+        <h3 style='color:white!important;'>{{i.subject_name}}</h3>
+        <p style='color:white!important;'>Open Folder</p>
+      </div>
+      
+    </a>
+
+    
+    {%endif%} 
+      
+      {% endfor %}
+      {% else %}
+      No data
+      {% endif %}
+
+      </div>
+
+<!-- Pending Course Folders -->
+<div class="section-header" style="margin-top: 2rem;">Draft Course Folders</div>
+<div class="card-grid">
+
+    {% if subjects %}
+        {% for i in subjects %}
+            {% if i.status == 'pending' %}
+            <a href='{% url "edit_upload_folder" i.id i.subject_name %}' style='text-decoration:none;'>
+
+                <div class="folder-card" style='background-color:{{i.color}}; ' style='text-decoration:none;'>
+                    <h3 style='color:white!important;'>{{ i.subject_name }}</h3>
+                    <p style='color:white!important;'>Open Folder</p>
+                </div>
+              </a>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>No Data</p>
+    {% endif %}
+</div>
+
+
+
+
+<!-- Approved Course Folders -->
+<div class="section-header" style="margin-top: 2rem;">Approved Course Folders</div>
+<div class="card-grid">
+    {% if subjects %}
+        {% for i in subjects %}
+            {% if i.status == 'approved' %}
+            <a href='{% url "preview-pdf" i.subject_name %}' style='text-decoration:none;'>
+                <div class="folder-card" style='background-color:{{i.color}};'>
+                    <!-- REMOVED urlencode here -->
+                    <h3 style='color:white !important; text-decoration: none;'>{{ i.subject_name }}</h3>
+                    <p style='color:white !important;'>Open Folder</p>
+                </div>
+            </a>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>No Data</p>
+    {% endif %}
+</div>
+
+
+
+   <!-- Returned Course Folder-->
+<div class="section-header" style="margin-top: 2rem;">Returned Course Folders</div>
+<div class="card-grid">
+    {% if subjects %}
+        {% for i in subjects %}
+            {% if i.status == 'rejected' %}
+              <!-- Combined styles into one attribute and added display:block -->
+              <a href='{% url "edit_upload_folder" i.id i.subject_name %}' 
+                 style='background-color:{{i.color}}; text-decoration:none; display:block;' 
+                 class="folder-card">
+                <h3 style='color:white !important; text-decoration:none !important;'>{{i.subject_name}}</h3>
+                <p style='color:white !important; text-decoration:none !important;'>Open Folder</p>
+              </a>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <p>No Data</p>
+    {% endif %}
+</div>
+  </div>
+  
+  </div>
+
+
+  
+</div>
+
+<script>
+  function loadNotifications() {
+  fetch('/get-notifications/')
+    .then(response => response.json())
+    .then(data => {
+      const countElem = document.getElementById('notification-count');
+      if (data.unread_count > 0) {
+        countElem.innerText = data.unread_count;
+        countElem.style.display = 'inline';
+      } else {
+        countElem.style.display = 'none';
+      }
+
+      const list = document.getElementById('notification-list');
+      list.innerHTML = '';
+      data.notifications.forEach(n => {
+        list.innerHTML += `<p><strong>${n.title}</strong><br>${n.message}</p>`;
+      });
+    });
+}
+
+document.getElementById('notification-bell').addEventListener('click', () => {
+  document.getElementById('notification-list').style.display = 'block';
+
+  // Mark all as read
+  fetch('/mark-as-read/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCookie('csrftoken')}
+  }).then(() => loadNotifications());
+});
+
+// Call on page load or interval
+loadNotifications();
+
+</script>
+{% endif %}
+
+
+
+{% endblock content %}

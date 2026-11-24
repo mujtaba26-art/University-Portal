@@ -1,0 +1,67 @@
+<!-- templates/chat/chat.html -->
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat App</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Welcome {{ request.user.username }}</h2>
+    
+    {% if request.user.is_staff %}
+    <label>Select user:</label>
+    <select id="user_select">
+        <option disabled selected>Select a user</option>
+        {% for user in users %}
+            <option value="{{ user.id }}">{{ user.username }}</option>
+        {% endfor %}
+    </select>
+    {% endif %}
+    
+    <div id="chat_box" style="border:1px solid #ccc; padding:10px; height:300px; overflow-y:auto;"></div>
+    <input type="text" id="message_input" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        let selectedUser = null;
+
+        $("#user_select").change(function() {
+            selectedUser = $(this).val();
+            fetchMessages();
+        });
+
+        function fetchMessages() {
+            if (!selectedUser) return;
+            $.get(`/chat/get-messages/${selectedUser}/`, function(data) {
+                $("#chat_box").empty();
+                data.forEach(msg => {
+                    $("#chat_box").append(`<div><b>${msg.sender}:</b> ${msg.content}</div>`);
+                });
+            });
+        }
+
+        function sendMessage() {
+            const content = $("#message_input").val();
+            if (!content || !selectedUser) return;
+
+            $.ajax({
+                url: '/chat/send-message/',
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    receiver_id: selectedUser,
+                    content: content
+                }),
+                success: function() {
+                    $("#message_input").val('');
+                    fetchMessages();
+                }
+            });
+        }
+
+        setInterval(fetchMessages, 3000); // refresh messages every 3 seconds
+    </script>
+</body>
+</html>

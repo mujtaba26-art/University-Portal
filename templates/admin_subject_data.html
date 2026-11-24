@@ -1,0 +1,532 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Subject Data View</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- PDF.js for PDF rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .subject-card {
+            margin-bottom: 20px;
+            border-left: 4px solid #0d6efd;
+        }
+        .document-section {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .status-approved {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .status-assign {
+            background-color: #cfe2ff;
+            color: #084298;
+        }
+        .file-link {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+        .file-link:hover {
+            text-decoration: underline;
+        }
+        .comment-box {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .preview-container {
+            margin-top: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 500px;
+            display: block;
+            margin: 0 auto;
+        }
+        .file-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .file-preview-btn {
+            margin-top: 10px;
+        }
+        .modal-fullscreen {
+            max-width: 90%;
+            margin: 1.75rem auto;
+        }
+        .preview-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-users me-2"></i>Teachers
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-book me-2"></i>Subjects
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-envelope me-2"></i>Messages
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Subject Data Review</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Print</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Form -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="subject" class="form-label">Subject</label>
+                                <select class="form-select" id="subject" name="subject">
+                                    <option value="">All Subjects</option>
+                                    {% for subject in subjects %}
+                                        <option value="{{ subject.id }}" {% if selected_subject == subject.id %}selected{% endif %}>{{ subject.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="teacher" class="form-label">Teacher</label>
+                                <select class="form-select" id="teacher" name="teacher">
+                                    <option value="">All Teachers</option>
+                                    {% for teacher in teachers %}
+                                        <option value="{{ teacher.id }}" {% if selected_teacher == teacher.id %}selected{% endif %}>{{ teacher.username }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                {% if teacher_documents %}
+                <!-- Results Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Results ({{ teacher_documents.count }} found)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for doc in teacher_documents %}
+                        <div class="card subject-card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0">{{ doc.subject_name.name }}</h5>
+                                    <small class="text-muted">Submitted by: {{ doc.user.username }}</small>
+                                </div>
+                                <span class="status-badge status-{{ doc.status }}">
+                                    {{ doc.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <!-- Document Sections -->
+                                <div class="document-section">
+                                    <h6><i class="fas fa-calendar-alt me-2"></i>Academic Schedule</h6>
+                                    {% if doc.academic_schedule %}
+                                        <p><strong>Semester:</strong> {{ doc.academic_schedule.semester_type.name }}</p>
+                                        <p><strong>Year:</strong> {{ doc.academic_schedule.year.name }}</p>
+                                        <p><strong>Created:</strong> {{ doc.academic_schedule.created_at|date:"M d, Y" }}</p>
+                                    {% else %}
+                                        <p class="text-muted">Not submitted</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="document-section">
+                                    <h6><i class="fas fa-bullseye me-2"></i>Course Objectives</h6>
+                                    {% if doc.course_objective %}
+                                        <p>{{ doc.course_objective.objectives|truncatechars:200 }}</p>
+                                        {% if doc.course_objective.objectivefile %}
+                                            <div class="preview-container">
+                                                <div class="file-icon text-center">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <p>{{ doc.course_objective.objectivefile.name|slice:"-20:" }}</p>
+                                                </div>
+                                                <a href="{{ doc.course_objective.objectivefile.url }}" class="file-link" target="_blank">
+                                                    <i class="fas fa-download me-1"></i>Download File
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-primary file-preview-btn" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#previewModal"
+                                                        data-file-url="{{ doc.course_objective.objectivefile.url }}"
+                                                        data-file-type="pdf">
+                                                    <i class="fas fa-eye me-1"></i>Preview
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="text-muted">Not submitted</p>
+                                    {% endif %}
+                                </div>
+
+                                <div class="document-section">
+                                    <h6><i class="fas fa-file-alt me-2"></i>Course Outline</h6>
+                                    {% if doc.course_outline %}
+                                        {% if doc.course_outline.outline_text %}
+                                            <p>{{ doc.course_outline.outline_text|truncatechars:200 }}</p>
+                                        {% endif %}
+                                        {% if doc.course_outline.outlinefile %}
+                                            <div class="preview-container">
+                                                <div class="file-icon text-center">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <p>{{ doc.course_outline.outlinefile.name|slice:"-20:" }}</p>
+                                                </div>
+                                                <a href="{{ doc.course_outline.outlinefile.url }}" class="file-link" target="_blank">
+                                                    <i class="fas fa-download me-1"></i>Download File
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-primary file-preview-btn" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#previewModal"
+                                                        data-file-url="{{ doc.course_outline.outlinefile.url }}"
+                                                        data-file-type="pdf">
+                                                    <i class="fas fa-eye me-1"></i>Preview
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <p class="text-muted">Not submitted</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Add more document sections with preview options as needed -->
+
+                                <!-- Status Update Form -->
+                                <div class="document-section mt-4">
+                                    <h6><i class="fas fa-comment-dots me-2"></i>Admin Feedback</h6>
+                                    <form method="post" action="">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Update Status</label>
+                                            <select class="form-select" id="status" name="status">
+                                                <option value="assign" {% if doc.status == 'assign' %}selected{% endif %}>Assign</option>
+                                                <option value="approved" {% if doc.status == 'approved' %}selected{% endif %}>Approved</option>
+                                                <option value="pending" {% if doc.status == 'pending' %}selected{% endif %}>Pending</option>
+                                                <option value="rejected" {% if doc.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="comment" class="form-label">Comments</label>
+                                            <textarea class="form-control" id="comment" name="comment" rows="3">{% if doc.comment %}{{ doc.comment }}{% endif %}</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                                    </form>
+                                </div>
+
+                                <!-- Comments Section -->
+                                {% if doc.comments.all %}
+                                <div class="document-section mt-4">
+                                    <h6><i class="fas fa-comments me-2"></i>Previous Comments</h6>
+                                    {% for comment in doc.comments.all %}
+                                    <div class="comment-box mb-2">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>{{ comment.teacher_document.user.username }}</strong>
+                                            <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                                        </div>
+                                        <p class="mb-0">{{ comment.comment_text }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No documents found matching your criteria. Please try different filters.
+                </div>
+                {% endif %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="previewModalLabel">File Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="preview-nav d-flex justify-content-between mb-3">
+                        <button class="btn btn-sm btn-outline-secondary" id="prevPage">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <span id="pageInfo">Page 1 of 1</span>
+                        <button class="btn btn-sm btn-outline-secondary" id="nextPage">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div id="pdfViewerContainer">
+                        <canvas id="pdfViewer"></canvas>
+                    </div>
+                    <div id="imageViewerContainer" style="display: none;">
+                        <img id="imageViewer" src="" class="img-fluid" alt="Preview">
+                    </div>
+                    <div id="unsupportedViewerContainer" style="display: none;">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Preview not available for this file type. Please download to view.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" id="downloadLink" class="btn btn-primary me-auto">
+                        <i class="fas fa-download me-1"></i> Download
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- PDF.js -->
+    <script>
+        // Initialize PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        
+        // Variables for PDF viewing
+        let pdfDoc = null,
+            pageNum = 1,
+            pageRendering = false,
+            pageNumPending = null,
+            scale = 1.5;
+        
+        // DOM elements
+        const pdfViewer = document.getElementById('pdfViewer');
+        const pageInfo = document.getElementById('pageInfo');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const pdfViewerContainer = document.getElementById('pdfViewerContainer');
+        const imageViewerContainer = document.getElementById('imageViewerContainer');
+        const imageViewer = document.getElementById('imageViewer');
+        const unsupportedViewerContainer = document.getElementById('unsupportedViewerContainer');
+        const downloadLink = document.getElementById('downloadLink');
+        
+        // Modal show event
+        const previewModal = document.getElementById('previewModal');
+        previewModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const fileUrl = button.getAttribute('data-file-url');
+            const fileType = button.getAttribute('data-file-type');
+            
+            // Set download link
+            downloadLink.href = fileUrl;
+            
+            // Show appropriate viewer based on file type
+            if (fileType === 'pdf') {
+                pdfViewerContainer.style.display = 'block';
+                imageViewerContainer.style.display = 'none';
+                unsupportedViewerContainer.style.display = 'none';
+                
+                // Load PDF
+                pdfjsLib.getDocument(fileUrl).promise.then(function(pdfDoc_) {
+                    pdfDoc = pdfDoc_;
+                    pageInfo.textContent = `Page 1 of ${pdfDoc.numPages}`;
+                    
+                    // Initial/first page rendering
+                    renderPage(1);
+                }).catch(function(error) {
+                    console.error('Error loading PDF:', error);
+                    showUnsupportedViewer();
+                });
+            } 
+            else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+                pdfViewerContainer.style.display = 'none';
+                imageViewerContainer.style.display = 'block';
+                unsupportedViewerContainer.style.display = 'none';
+                
+                imageViewer.src = fileUrl;
+            }
+            else {
+                showUnsupportedViewer();
+            }
+        });
+        
+        // Modal hidden event - cleanup
+        previewModal.addEventListener('hidden.bs.modal', function () {
+            pdfDoc = null;
+            pageNum = 1;
+            imageViewer.src = '';
+        });
+        
+        // Show unsupported file type message
+        function showUnsupportedViewer() {
+            pdfViewerContainer.style.display = 'none';
+            imageViewerContainer.style.display = 'none';
+            unsupportedViewerContainer.style.display = 'block';
+        }
+        
+        // Render PDF page
+        function renderPage(num) {
+            pageRendering = true;
+            
+            pdfDoc.getPage(num).then(function(page) {
+                const viewport = page.getViewport({ scale: scale });
+                pdfViewer.height = viewport.height;
+                pdfViewer.width = viewport.width;
+                
+                const renderContext = {
+                    canvasContext: pdfViewer.getContext('2d'),
+                    viewport: viewport
+                };
+                
+                const renderTask = page.render(renderContext);
+                
+                renderTask.promise.then(function() {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+            
+            pageInfo.textContent = `Page ${num} of ${pdfDoc.numPages}`;
+            
+            // Enable/disable page buttons
+            prevPageBtn.disabled = num <= 1;
+            nextPageBtn.disabled = num >= pdfDoc.numPages;
+        }
+        
+        // Queue rendering of the previous page
+        function onPrevPage() {
+            if (pageNum <= 1) return;
+            pageNum--;
+            queueRenderPage(pageNum);
+        }
+        
+        // Queue rendering of the next page
+        function onNextPage() {
+            if (pageNum >= pdfDoc.numPages) return;
+            pageNum++;
+            queueRenderPage(pageNum);
+        }
+        
+        // Queue page rendering
+        function queueRenderPage(num) {
+            if (pageRendering) {
+                pageNumPending = num;
+            } else {
+                renderPage(num);
+            }
+        }
+        
+        // Event listeners for page navigation
+        prevPageBtn.addEventListener('click', onPrevPage);
+        nextPageBtn.addEventListener('click', onNextPage);
+        
+        // Simple JavaScript for enhancing the UI
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add active class to current nav item
+            const currentPage = window.location.pathname;
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentPage) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Set file type for preview buttons
+            document.querySelectorAll('.file-preview-btn').forEach(btn => {
+                const fileUrl = btn.getAttribute('data-file-url');
+                const extension = fileUrl.split('.').pop().toLowerCase();
+                
+                // Determine file type
+                let fileType = 'other';
+                if (extension === 'pdf') fileType = 'pdf';
+                else if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) fileType = extension;
+                
+                btn.setAttribute('data-file-type', fileType);
+            });
+        });
+    </script>
+</body>
+</html>

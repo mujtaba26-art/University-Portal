@@ -1,0 +1,90 @@
+{% extends 'base-teacher.html' %}
+
+{% block content %}
+<div class="dashboard-content">
+    <h2>Academic Management</h2>
+    
+    <div class="management-section">
+        <!-- Year Management -->
+        <div class="management-card">
+            <h3>Academic Years</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="year_name">Add New Year:</label>
+                    <input type="text" id="year_name" name="year_name" required>
+                </div>
+                <button type="submit" name="create_year" class="btn btn-primary">Add Year</button>
+            </form>
+            
+            <div class="list-container">
+                <h4>Existing Years:</h4>
+                <ul>
+                    {% for year in years %}
+                    <li>{{ year.name }}</li>
+                    {% empty %}
+                    <li>No years created yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Semester Management -->
+        <div class="management-card">
+            <h3>Semester Types</h3>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="semester_name">Add New Semester:</label>
+                    <input type="text" id="semester_name" name="semester_name" required>
+                </div>
+                <button type="submit" name="create_semester" class="btn btn-primary">Add Semester</button>
+            </form>
+            
+            <div class="list-container">
+                <h4>Existing Semesters:</h4>
+                <ul>
+                    {% for semester in semesters %}
+                    <li>{{ semester.name }}</li>
+                    {% empty %}
+                    <li>No semesters created yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .management-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .management-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .list-container {
+        margin-top: 20px;
+    }
+    
+    .list-container ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .list-container li {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .list-container li:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %} 

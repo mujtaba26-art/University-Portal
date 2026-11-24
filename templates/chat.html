@@ -1,0 +1,93 @@
+ <meta name="csrf-token" content="{{ csrf_token }}">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --accent-color: #28a745;
+            --text-color: #333;
+            --bg-color: #fff;
+            --card-bg: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <button id="chat-toggle" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: var(--primary-color); color: white; padding: 10px 16px; border: none; border-radius: 50%; font-size: 18px; cursor: pointer;">💬</button>
+
+    <div id="chatbox" style="display: none; position: fixed; bottom: 80px; right: 20px; width: 300px; max-height: 400px; background-color: var(--card-bg); border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); z-index: 999; overflow: hidden; font-family: 'Inter', sans-serif;">
+        <div style="background-color: var(--primary-color); color: white; padding: 10px; font-weight: 600;">
+            Chat Support
+            {% if users|length > 1 %}
+                <select id="user-select" style="float: right; background: white; color: black; border: none; padding: 2px; font-size: 12px;">
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.username }}</option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input type="hidden" id="user-select" value="{{ users.0.id }}">
+            {% endif %}
+        </div>
+
+        <div style="padding: 10px; height: 250px; overflow-y: auto;" id="chat-messages">
+            <p style="color: var(--text-color);">👋 Hi! How can I help you?</p>
+        </div>
+
+        <div style="display: flex; border-top: 1px solid #ccc;">
+            <input type="text" id="chat-input" placeholder="Type a message..." style="flex: 1; border: none; padding: 10px; outline: none; color: var(--text-color); background: var(--bg-color);">
+            <button id="send-btn" style="background-color: var(--accent-color); border: none; color: white; padding: 10px 12px;">➤</button>
+        </div>
+    </div>
+
+    <script>
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatbox = document.getElementById('chatbox');
+        const sendBtn = document.getElementById('send-btn');
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const receiverIdInput = document.getElementById('user-select');
+
+        chatToggle.addEventListener('click', () => {
+            chatbox.style.display = chatbox.style.display === 'none' ? 'block' : 'none';
+            loadMessages(); // Load messages when opened
+        });
+
+        function loadMessages() {
+            const receiverId = receiverIdInput.value;
+            fetch(`/get-messages/?receiver_id=${receiverId}`)
+                .then(response => response.json())
+                .then(data => {
+                    chatMessages.innerHTML = '';
+                    data.messages.forEach(msg => {
+                        const p = document.createElement('p');
+                        p.textContent = `${msg.sender}: ${msg.content}`;
+                        p.style.color = 'var(--text-color)';
+                        chatMessages.appendChild(p);
+                    });
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
+        }
+
+        sendBtn.addEventListener('click', () => {
+            const message = chatInput.value.trim();
+            const receiverId = receiverIdInput.value;
+            if (message) {
+                fetch('/send-message/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: `receiver_id=${receiverId}&content=${encodeURIComponent(message)}`
+                }).then(() => {
+                    chatInput.value = '';
+                    loadMessages();
+                });
+            }
+        });
+
+        chatInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') sendBtn.click();
+        });
+
+        if (receiverIdInput.tagName === 'SELECT') {
+            receiverIdInput.addEventListener('change', loadMessages);
+        }
+    </script>

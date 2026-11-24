@@ -1,0 +1,119 @@
+{% extends 'base-teacher.html' %}
+
+{% block content %}
+<div class="dashboard-content">
+    <h2>Document Management</h2>
+    
+    <div class="document-table-container">
+        <table class="document-table">
+            <thead>
+                <tr>
+                    <th>Document</th>
+                    <th>Teacher</th>
+                    <th>Year/Semester</th>
+                    <th>Subject</th>
+                    <th>Current Status</th>
+                    <th>Change Status</th>
+                    <th>View File</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr>
+                    <td>{{ doc.document_type }}</td>
+                    <td>{{ doc.user.username }}</td>
+                    <td>
+                        {{ doc.academic_schedule.year.name }} - 
+                        {{ doc.academic_schedule.semester_type.name }}
+                    </td>
+                    <td>{{ doc.academic_schedule.subject_name.name }}</td>
+                    <td>
+                        <span class="status-badge status-{{ doc.status }}">
+                            {{ doc.status|title }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="post" class="status-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="document_id" value="{{ doc.id }}">
+                            <select name="new_status" class="status-select">
+                                <option value="assign" {% if doc.status == 'assign' %}selected{% endif %}>Assign</option>
+                                <option value="pending" {% if doc.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="approved" {% if doc.status == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="rejected" {% if doc.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm">Update</button>
+                        </form>
+                    </td>
+                    <td>
+                        {% if doc.document_file %}
+                        <a href="{{ doc.document_file.url }}" target="_blank" class="btn btn-view">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        {% else %}
+                        No file
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .document-table-container {
+        overflow-x: auto;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .document-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .document-table th, 
+    .document-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .document-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .status-form {
+        display: flex;
+        gap: 5px;
+    }
+    
+    .status-select {
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .status-assign { background-color: #9b59b6; color: white; }
+    .status-pending { background-color: #f1c40f; color: black; }
+    .status-approved { background-color: #2ecc71; color: white; }
+    .status-rejected { background-color: #e74c3c; color: white; }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
